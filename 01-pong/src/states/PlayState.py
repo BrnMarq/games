@@ -4,7 +4,6 @@ import pygame
 import settings
 
 from gale.state import BaseState
-from gale.text import render_text
 from gale.input_handler import InputData, KeyboardData
 
 from src.rendering import render_table
