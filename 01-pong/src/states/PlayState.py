@@ -47,6 +47,8 @@ class PlayState(BaseState):
         self.state_machine.change("serve", pong=pong)
 
     def update(self, dt) -> None:
+        self.ai_player()
+
         pong = self.pong
         pong.player1.update(dt)
         pong.player2.update(dt)
@@ -99,14 +101,19 @@ class PlayState(BaseState):
                     sign = -1 if input_id == "p1_up" else 1
                     if pong.player1.vy == sign * settings.PADDLE_SPEED:
                         pong.player1.vy = 0
-            elif input_id in ("p2_up", "p2_down"):
-                if input_data.pressed:
-                    pong.player2.vy = (
-                        -settings.PADDLE_SPEED
-                        if input_id == "p2_up"
-                        else settings.PADDLE_SPEED
-                    )
-                else:
-                    sign = -1 if input_id == "p2_up" else 1
-                    if pong.player2.vy == sign * settings.PADDLE_SPEED:
-                        pong.player2.vy = 0
+
+    def ai_player(self) -> None:
+        ball = self.pong.ball
+        p2 = self.pong.player2
+
+        ball_center = ball.y + (ball.width / 2)
+        p2_center = p2.y + (p2.height / 2)
+
+        acceptance_margin = 5
+
+        if p2_center > ball_center + acceptance_margin:
+            p2.vy = -settings.PADDLE_SPEED
+        elif p2_center < ball_center - acceptance_margin:
+            p2.vy = settings.PADDLE_SPEED
+        else:
+            p2.vy = 0
