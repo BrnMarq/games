@@ -2,12 +2,10 @@ import pygame
 
 from gale.game import Game
 from gale.input_handler import InputData, KeyboardData
-from gale.state import BaseState, StateMachine
+from gale.state import StateMachine
 
 from src.Paddle import Paddle
 from src.Ball import Ball
-from src.rendering import render_table
-from typing import Dict, Type
 
 from src import states
 import settings
