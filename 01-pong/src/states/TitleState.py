@@ -29,6 +29,5 @@ class TitleState(BaseState):
     def on_input(self, input_id: str, input_data: InputData) -> None:
         if isinstance(input_data, KeyboardData):
             if input_id == "confirm" and input_data.pressed:
-                print("asdasd")
                 self.pong.serving_player = random.randint(1, 2)
                 self.state_machine.change("serve", pong=self.pong)
