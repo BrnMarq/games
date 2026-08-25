@@ -59,6 +59,10 @@ JUMP_TAKEOFF_SPEED = GRAVITY / 6
 
 TIME_TO_SPAWN_LOGS = 1.5
 
+STAR_SIZE = 25
+STAR_SPAWN_CHANCE = 2
+GHOST_DURATION = 3
+
 MEDIUM_TEXT_SIZE = 18
 HUGE_TEXT_SIZE = 56
 FLAPPY_TEXT_SIZE = 28
@@ -72,6 +76,7 @@ TEXTURES = {
     ),
     "ground": pygame.image.load(BASE_DIR / "assets" / "graphics" / "ground.png"),
     "log": pygame.image.load(BASE_DIR / "assets" / "graphics" / "log.png"),
+    "star": pygame.image.load(BASE_DIR / "assets" / "graphics" / "star.png"),
 }
 # The top log of every pair is the same image, flipped upside down.
 TEXTURES["log_inverted"] = pygame.transform.flip(TEXTURES["log"], False, True)

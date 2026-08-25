@@ -55,6 +55,7 @@ class PlayingState(BaseState):
 
     def render(self, surface: pygame.Surface) -> None:
         self.world.render(surface)
+        self.strategy.render(surface)
         self.bird.render(surface)
         render_text(
             surface,
