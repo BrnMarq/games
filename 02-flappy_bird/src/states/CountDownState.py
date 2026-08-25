@@ -22,9 +22,9 @@ from src.gamemodes import GameModeStrategy, NormalMode
 
 class CountDownState(BaseState):
     def enter(
-        self, gamemode: Optional[GameModeStrategy] = None, *args, **kwargs
+        self, gamemode: Optional[type[GameModeStrategy]] = None, *args, **kwargs
     ) -> None:
-        self.world = World(generate_logs=False)
+        self.world = World()
         self.gamemode = gamemode
         self.counter = 3
         self.timer = 0.0

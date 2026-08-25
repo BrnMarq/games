@@ -34,7 +34,6 @@ class PlayingState(BaseState):
         **kwargs,
     ) -> None:
         self.world = world if world is not None else World()
-        self.world.reset(True)
         self.bird = (
             bird
             if bird is not None
@@ -46,7 +45,7 @@ class PlayingState(BaseState):
             )
         )
         self.strategy = (
-            gamemode
+            gamemode(self.world, self.bird, score, self.state_machine)
             if gamemode is not None
             else NormalMode(self.world, self.bird, score, self.state_machine)
         )

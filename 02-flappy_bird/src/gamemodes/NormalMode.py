@@ -47,7 +47,7 @@ class NormalMode(GameModeStrategy):
         if self.world.collides(self.bird.get_rect()):
             settings.SOUNDS["explosion"].play()
             settings.SOUNDS["hurt"].play()
-            self.state_machine.change("count_down")
+            self.state_machine.change("count_down", gamemode=type(self))
             return
 
         if self.world.update_scored(self.bird.get_rect()):
@@ -60,5 +60,9 @@ class NormalMode(GameModeStrategy):
                 self.bird.jump()
             elif input_id == "pause" and input_data.pressed:
                 self.state_machine.change(
-                    "pause", world=self.world, bird=self.bird, score=self.score
+                    "pause",
+                    world=self.world,
+                    bird=self.bird,
+                    score=self.score,
+                    gamemode=type(self),
                 )

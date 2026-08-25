@@ -60,7 +60,7 @@ class HardMode(GameModeStrategy):
         if self.world.collides(self.bird.get_rect()):
             settings.SOUNDS["explosion"].play()
             settings.SOUNDS["hurt"].play()
-            self.state_machine.change("count_down")
+            self.state_machine.change("count_down", gamemode=type(self))
             return
 
         if self.world.update_scored(self.bird.get_rect()):
@@ -75,7 +75,11 @@ class HardMode(GameModeStrategy):
                         self.bird.jump()
                     case "pause":
                         self.state_machine.change(
-                            "pause", world=self.world, bird=self.bird, score=self.score
+                            "pause",
+                            world=self.world,
+                            bird=self.bird,
+                            score=self.score,
+                            gamemode=type(self),
                         )
                     case "move_left":
                         self.bird.vx = -settings.BIRD_X_SPEED

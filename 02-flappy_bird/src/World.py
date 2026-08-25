@@ -21,14 +21,10 @@ from src.LogPair import LogPair
 
 
 class World:
-    def __init__(self, generate_logs: bool = False) -> None:
-        self.generate_logs: bool = generate_logs
+    def __init__(self) -> None:
         self.background_x: float = 0.0
         self.ground_x: float = 0.0
         self.logs: List[LogPair] = []
-
-    def reset(self, generate_logs: bool) -> None:
-        self.generate_logs = generate_logs
 
     def collides(self, rect: pygame.Rect) -> bool:
         if rect.bottom >= settings.VIRTUAL_HEIGHT:
