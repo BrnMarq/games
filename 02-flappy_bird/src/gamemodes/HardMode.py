@@ -90,6 +90,7 @@ class HardMode(GameModeStrategy):
                         self.bird.vx = settings.BIRD_X_SPEED
                     case "confirm":
                         self.bird.ghost_time_left = 5
+                        self.bird.start_ghost_pulse()
             elif input_data.released:
                 match input_id:
                     case "move_left":
