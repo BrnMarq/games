@@ -23,6 +23,8 @@ class Bird:
         self.vx: float = 0.0
         self.jumping: bool = False
 
+        self.ghost_time_left = 0
+
     def get_rect(self) -> pygame.Rect:
         return pygame.Rect(round(self.x), round(self.y), self.width, self.height)
 
@@ -37,7 +39,11 @@ class Bird:
             self.vy = -settings.JUMP_TAKEOFF_SPEED
             self.jumping = False
 
+        if self.ghost_time_left > 0:
+            self.ghost_time_left -= dt
+
         self.y += self.vy * dt
+        self.y = max(self.y, 0)
 
     def render(self, surface: pygame.Surface) -> None:
         surface.blit(settings.TEXTURES["bird"], self.get_rect())

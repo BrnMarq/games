@@ -57,7 +57,10 @@ class HardMode(GameModeStrategy):
             )
             self.time_to_next_log = random.uniform(1, 2)
 
-        if self.world.collides(self.bird.get_rect()):
+        if self.world.collides_with_ground(self.bird.get_rect()) or (
+            not (self.bird.ghost_time_left > 0)
+            and self.world.collides_with_logs(self.bird.get_rect())
+        ):
             settings.SOUNDS["explosion"].play()
             settings.SOUNDS["hurt"].play()
             self.state_machine.change("count_down", gamemode=type(self))
@@ -85,6 +88,8 @@ class HardMode(GameModeStrategy):
                         self.bird.vx = -settings.BIRD_X_SPEED
                     case "move_right":
                         self.bird.vx = settings.BIRD_X_SPEED
+                    case "confirm":
+                        self.bird.ghost_time_left = 5
             elif input_data.released:
                 match input_id:
                     case "move_left":

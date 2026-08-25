@@ -26,11 +26,15 @@ class World:
         self.ground_x: float = 0.0
         self.logs: List[LogPair] = []
 
-    def collides(self, rect: pygame.Rect) -> bool:
+    def collides_with_ground(self, rect: pygame.Rect):
         if rect.bottom >= settings.VIRTUAL_HEIGHT:
             return True
 
+    def collides_with_logs(self, rect: pygame.Rect):
         return any(log_pair.collides(rect) for log_pair in self.logs)
+
+    def collides(self, rect: pygame.Rect) -> bool:
+        return self.collides_with_ground(rect) or self.collides_with_logs(rect)
 
     def update_scored(self, rect: pygame.Rect) -> bool:
         return any(log_pair.update_scored(rect) for log_pair in self.logs)
