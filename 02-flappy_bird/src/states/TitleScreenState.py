@@ -21,6 +21,7 @@ from gale.text import render_text
 
 import settings
 from src.World import World
+from src.gamemodes import NormalMode, HardMode
 
 
 class TitleScreenState(BaseState):
@@ -44,7 +45,7 @@ class TitleScreenState(BaseState):
         )
         render_text(
             surface,
-            "Press Enter to start",
+            "Press N to play Normal Mode",
             settings.FONTS["medium"],
             settings.VIRTUAL_WIDTH / 2,
             2 * settings.VIRTUAL_HEIGHT / 3,
@@ -52,8 +53,20 @@ class TitleScreenState(BaseState):
             center=True,
             shadowed=True,
         )
+        render_text(
+            surface,
+            "Press H to play Hard Mode",
+            settings.FONTS["medium"],
+            settings.VIRTUAL_WIDTH / 2,
+            2 * settings.VIRTUAL_HEIGHT / 3 + 30,
+            pygame.Color(settings.COLOR_WHITE),
+            center=True,
+            shadowed=True,
+        )
 
     def on_input(self, input_id: str, input_data: InputData) -> None:
         if isinstance(input_data, (KeyboardData, MouseClickData, GamepadButtonData)):
-            if input_id == "confirm" and input_data.pressed:
-                self.state_machine.change("count_down")
+            if input_id == "primary_option" and input_data.pressed:
+                self.state_machine.change("count_down", gamemode=NormalMode)
+            elif input_id == "secondary_option" and input_data.pressed:
+                self.state_machine.change("count_down", gamemode=HardMode)

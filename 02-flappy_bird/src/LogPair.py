@@ -16,27 +16,51 @@ import settings
 
 
 class LogPair:
-    def __init__(self, x: float, y: float) -> None:
+    def __init__(
+        self, x: float, y: float, gap: float = settings.LOGS_GAP, closing: bool = False
+    ) -> None:
         self.x: float = x
         self.y: float = y
         self.scored: bool = False
+        self.gap: float = gap
+        self.closing: bool = closing
+
+        self.closing_time: float = 0
 
     def get_top_rect(self) -> pygame.Rect:
-        return pygame.Rect(round(self.x), round(self.y), settings.LOG_WIDTH, settings.LOG_HEIGHT)
+        return pygame.Rect(
+            round(self.x), round(self.y), settings.LOG_WIDTH, settings.LOG_HEIGHT
+        )
 
     def get_bottom_rect(self) -> pygame.Rect:
         return pygame.Rect(
             round(self.x),
-            round(self.y + settings.LOGS_GAP + settings.LOG_HEIGHT),
+            round(self.y + self.gap + settings.LOG_HEIGHT),
             settings.LOG_WIDTH,
             settings.LOG_HEIGHT,
         )
 
     def collides(self, rect: pygame.Rect) -> bool:
-        return self.get_top_rect().colliderect(rect) or self.get_bottom_rect().colliderect(rect)
+        return self.get_top_rect().colliderect(
+            rect
+        ) or self.get_bottom_rect().colliderect(rect)
 
     def update(self, dt: float) -> None:
         self.x += -settings.MAIN_SCROLL_SPEED * dt
+
+        if self.closing:
+            self.closing_time += dt
+            self.gap -= settings.LOG_CLOSE_SPEED * dt
+            self.y += settings.LOG_CLOSE_SPEED * dt / 2
+
+        if self.gap < 0:
+            settings.SOUNDS["wood_crush"].play()
+            self.closing = False
+
+        if not self.closing and self.closing_time > 0:
+            self.closing_time -= dt
+            self.gap += settings.LOG_CLOSE_SPEED * dt
+            self.y -= settings.LOG_CLOSE_SPEED * dt / 2
 
     def is_out_of_game(self) -> bool:
         return self.x < -settings.LOG_WIDTH

@@ -23,6 +23,8 @@ import settings
 from src.Bird import Bird
 from src.World import World
 
+from src.gamemodes import GameModeStrategy
+
 
 class PauseState(BaseState):
     def enter(
@@ -30,13 +32,14 @@ class PauseState(BaseState):
         world: World,
         bird: Bird,
         score: int,
+        gamemode: type[GameModeStrategy],
         *args,
         **kwargs,
     ) -> None:
         self.world = world
-        self.world.reset(True)
         self.bird = bird
         self.score = score
+        self.gamemode = gamemode
 
     def render(self, surface: pygame.Surface) -> None:
         self.world.render(surface)
@@ -65,5 +68,9 @@ class PauseState(BaseState):
         if isinstance(input_data, (KeyboardData, MouseClickData, GamepadButtonData)):
             if input_id == "pause" and input_data.pressed:
                 self.state_machine.change(
-                    "playing", world=self.world, bird=self.bird, score=self.score
+                    "playing",
+                    world=self.world,
+                    bird=self.bird,
+                    score=self.score,
+                    gamemode=self.gamemode,
                 )

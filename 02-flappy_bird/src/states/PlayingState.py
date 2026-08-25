@@ -12,18 +12,15 @@ from typing import Optional
 
 import pygame
 
-from gale.input_handler import (
-    InputData,
-    KeyboardData,
-    MouseClickData,
-    GamepadButtonData,
-)
+from gale.input_handler import InputData
 from gale.state import BaseState
 from gale.text import render_text
 
 import settings
 from src.Bird import Bird
 from src.World import World
+
+from src.gamemodes import GameModeStrategy, NormalMode, HardMode
 
 
 class PlayingState(BaseState):
@@ -32,6 +29,7 @@ class PlayingState(BaseState):
         world: Optional[World] = None,
         bird: Optional[Bird] = None,
         score: int = 0,
+        gamemode: Optional[type[GameModeStrategy]] = None,
         *args,
         **kwargs,
     ) -> None:
@@ -47,28 +45,21 @@ class PlayingState(BaseState):
                 settings.BIRD_HEIGHT,
             )
         )
-        self.score = score
+        self.strategy = (
+            gamemode
+            if gamemode is not None
+            else NormalMode(self.world, self.bird, score, self.state_machine)
+        )
 
     def update(self, dt: float) -> None:
-        self.bird.update(dt)
-        self.world.update(dt)
-
-        if self.world.collides(self.bird.get_rect()):
-            settings.SOUNDS["explosion"].play()
-            settings.SOUNDS["hurt"].play()
-            self.state_machine.change("count_down")
-            return
-
-        if self.world.update_scored(self.bird.get_rect()):
-            self.score += 1
-            settings.SOUNDS["score"].play()
+        self.strategy.update(dt)
 
     def render(self, surface: pygame.Surface) -> None:
         self.world.render(surface)
         self.bird.render(surface)
         render_text(
             surface,
-            f"Score: {self.score}",
+            f"Score: {self.strategy.score}",
             settings.FONTS["flappy"],
             20,
             10,
@@ -77,10 +68,4 @@ class PlayingState(BaseState):
         )
 
     def on_input(self, input_id: str, input_data: InputData) -> None:
-        if isinstance(input_data, (KeyboardData, MouseClickData, GamepadButtonData)):
-            if input_id == "jump" and input_data.pressed:
-                self.bird.jump()
-            elif input_id == "pause" and input_data.pressed:
-                self.state_machine.change(
-                    "pause", world=self.world, bird=self.bird, score=self.score
-                )
+        self.strategy.on_input(input_id, input_data)

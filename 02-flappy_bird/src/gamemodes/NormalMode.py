@@ -1,0 +1,64 @@
+import random
+
+from .Strategy import GameModeStrategy
+
+from gale.factory import Factory
+from gale.input_handler import (
+    InputData,
+    KeyboardData,
+    MouseClickData,
+    GamepadButtonData,
+)
+
+from src.LogPair import LogPair
+import settings
+
+
+class NormalMode(GameModeStrategy):
+    def __init__(self, world, bird, score, state_machine):
+        self.world = world
+        self.bird = bird
+        self.state_machine = state_machine
+        self.score = score
+        self.logs_spawn_timer: float = 0.0
+        self.last_log_y: float = -settings.LOG_HEIGHT + random.randint(0, 80) + 20
+        self.log_pair_factory: Factory = Factory(LogPair)
+
+    def update(self, dt):
+        self.bird.update(dt)
+        self.world.update(dt)
+
+        self.logs_spawn_timer += dt
+
+        if self.logs_spawn_timer >= settings.TIME_TO_SPAWN_LOGS:
+            self.logs_spawn_timer = 0.0
+            y = max(
+                -settings.LOG_HEIGHT + 10,
+                min(
+                    self.last_log_y + random.randint(-20, 20),
+                    settings.VIRTUAL_HEIGHT + 90 - settings.LOG_HEIGHT,
+                ),
+            )
+            self.last_log_y = y
+            self.world.logs.append(
+                self.log_pair_factory.create(settings.VIRTUAL_WIDTH, y)
+            )
+
+        if self.world.collides(self.bird.get_rect()):
+            settings.SOUNDS["explosion"].play()
+            settings.SOUNDS["hurt"].play()
+            self.state_machine.change("count_down")
+            return
+
+        if self.world.update_scored(self.bird.get_rect()):
+            self.score += 1
+            settings.SOUNDS["score"].play()
+
+    def on_input(self, input_id: str, input_data: InputData) -> None:
+        if isinstance(input_data, (KeyboardData, MouseClickData, GamepadButtonData)):
+            if input_id == "jump" and input_data.pressed:
+                self.bird.jump()
+            elif input_id == "pause" and input_data.pressed:
+                self.state_machine.change(
+                    "pause", world=self.world, bird=self.bird, score=self.score
+                )

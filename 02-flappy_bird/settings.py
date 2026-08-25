@@ -19,7 +19,13 @@ from gale import input_handler
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_BACKSPACE, "quit")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_ESCAPE, "pause")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RETURN, "confirm")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_h, "secondary_option")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_n, "primary_option")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_SPACE, "jump")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_w, "jump")
+input_handler.InputHandler.set_mouse_click_action(input_handler.MOUSE_BUTTON_1, "jump")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_a, "move_left")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_d, "move_right")
 
 TITLE = "Flappy Bird"
 
@@ -33,10 +39,13 @@ VIRTUAL_HEIGHT = 288
 
 BIRD_WIDTH = 39
 BIRD_HEIGHT = 28
+BIRD_X_SPEED = 100
 
 LOG_WIDTH = 70
 LOG_HEIGHT = 288
 LOGS_GAP = 90
+LOG_CLOSE_SPEED = 50
+CLOSING_LOGS_CHANCE = 30  # 30%
 
 GROUND_HEIGHT = 16
 
@@ -72,6 +81,7 @@ SOUNDS = {
     "explosion": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "explosion.wav"),
     "hurt": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "hurt.wav"),
     "score": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "score.wav"),
+    "wood_crush": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "wood_crush.ogg"),
 }
 
 pygame.mixer.music.load(BASE_DIR / "assets" / "sounds" / "marios_way.ogg")
