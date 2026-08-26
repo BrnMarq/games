@@ -7,6 +7,7 @@ from gale.state import BaseState
 from gale.input_handler import InputData, KeyboardData
 
 from src.rendering import render_table
+from src.Paddle import Paddle
 
 
 class PlayState(BaseState):
@@ -46,9 +47,10 @@ class PlayState(BaseState):
         self.state_machine.change("serve", pong=pong)
 
     def update(self, dt) -> None:
-        self.ai_player()
-
         pong = self.pong
+
+        self.ai_player(pong.player2)
+
         pong.player1.update(dt)
         pong.player2.update(dt)
         pong.ball.update(dt)
@@ -101,18 +103,17 @@ class PlayState(BaseState):
                     if pong.player1.vy == sign * settings.PADDLE_SPEED:
                         pong.player1.vy = 0
 
-    def ai_player(self) -> None:
+    def ai_player(self, player: Paddle) -> None:
         ball = self.pong.ball
-        p2 = self.pong.player2
 
         ball_center = ball.y + (ball.width / 2)
-        p2_center = p2.y + (p2.height / 2)
+        p_center = player.y + (player.height / 2)
 
-        acceptance_margin = 5
+        acceptance_margin = 4
 
-        if p2_center > ball_center + acceptance_margin:
-            p2.vy = -settings.PADDLE_SPEED
-        elif p2_center < ball_center - acceptance_margin:
-            p2.vy = settings.PADDLE_SPEED
+        if p_center > ball_center + acceptance_margin:
+            player.vy = -settings.PADDLE_SPEED
+        elif p_center < ball_center - acceptance_margin:
+            player.vy = settings.PADDLE_SPEED
         else:
-            p2.vy = 0
+            player.vy = 0
