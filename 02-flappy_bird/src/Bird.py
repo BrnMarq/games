@@ -28,9 +28,7 @@ class Bird:
         self.ghost_time_left = 0
         self.ghost_alpha: float = 0
         self.ghost_overlay = settings.TEXTURES["bird"].copy()
-        self.ghost_overlay.fill(
-            (255, 255, 255, 0), special_flags=pygame.BLEND_RGBA_MAX
-        )
+        self.ghost_overlay.fill((255, 255, 255, 0), special_flags=pygame.BLEND_RGBA_MAX)
         self._ghost_tween = None
 
     def start_ghost_pulse(self) -> None:
@@ -66,7 +64,6 @@ class Bird:
 
     def update(self, dt: float) -> None:
         self.vy += settings.GRAVITY * dt
-        self.x += self.vx * dt
         if self.jumping:
             settings.SOUNDS["jump"].play()
             self.vy = -settings.JUMP_TAKEOFF_SPEED
@@ -79,6 +76,8 @@ class Bird:
 
         self.y += self.vy * dt
         self.y = max(self.y, 0)
+        self.x += self.vx * dt
+        self.x = max(0, min(settings.VIRTUAL_WIDTH - settings.BIRD_WIDTH, self.x))
 
     def render(self, surface: pygame.Surface) -> None:
         bird_rect = self.get_rect()
