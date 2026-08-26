@@ -18,6 +18,7 @@ from gale.factory import Factory
 
 import settings
 from src.LogPair import LogPair
+from src.powerups import Star
 
 
 class World:
@@ -25,6 +26,7 @@ class World:
         self.background_x: float = 0.0
         self.ground_x: float = 0.0
         self.logs: List[LogPair] = []
+        self.stars: List[Star] = []
 
     def collides_with_ground(self, rect: pygame.Rect):
         if rect.bottom >= settings.VIRTUAL_HEIGHT:
@@ -32,6 +34,13 @@ class World:
 
     def collides_with_logs(self, rect: pygame.Rect):
         return any(log_pair.collides(rect) for log_pair in self.logs)
+
+    def collect_star(self, rect: pygame.Rect) -> Star | None:
+        for star in self.stars:
+            if star.get_rect().colliderect(rect):
+                self.stars.remove(star)
+                return star
+        return None
 
     def collides(self, rect: pygame.Rect) -> bool:
         return self.collides_with_ground(rect) or self.collides_with_logs(rect)
@@ -57,11 +66,19 @@ class World:
             log_pair for log_pair in self.logs if not log_pair.is_out_of_game()
         ]
 
+        for star in self.stars:
+            star.update(dt)
+
+        self.stars = [star for star in self.stars if not star.is_out_of_game()]
+
     def render(self, surface: pygame.Surface) -> None:
         surface.blit(settings.TEXTURES["background"], (round(self.background_x), 0))
 
         for log_pair in self.logs:
             log_pair.render(surface)
+
+        for star in self.stars:
+            star.render(surface)
 
         surface.blit(
             settings.TEXTURES["ground"],

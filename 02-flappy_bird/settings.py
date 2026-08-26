@@ -60,8 +60,8 @@ JUMP_TAKEOFF_SPEED = GRAVITY / 6
 TIME_TO_SPAWN_LOGS = 1.5
 
 STAR_SIZE = 25
-STAR_SPAWN_CHANCE = 2
-GHOST_DURATION = 3
+STAR_SPAWN_CHANCE = 5
+GHOST_DURATION = 10
 
 MEDIUM_TEXT_SIZE = 18
 HUGE_TEXT_SIZE = 56
@@ -90,6 +90,9 @@ SOUNDS = {
 }
 
 pygame.mixer.music.load(BASE_DIR / "assets" / "sounds" / "marios_way.ogg")
+
+GHOST_MUSIC_PATH = BASE_DIR / "assets" / "sounds" / "ttfaf.ogg"
+NORMAL_MUSIC_PATH = BASE_DIR / "assets" / "sounds" / "marios_way.ogg"
 
 FONTS = {
     "medium": pygame.font.Font(

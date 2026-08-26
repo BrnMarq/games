@@ -26,12 +26,12 @@ class HardMode(GameModeStrategy):
         self.logs_spawn_timer: float = 0.0
         self.last_log_y: float = -settings.LOG_HEIGHT + random.randint(0, 80) + 20
         self.log_pair_factory: Factory = Factory(LogPair)
+        self.star_factory: Factory = Factory(Star)
 
         self.time_to_next_log = settings.TIME_TO_SPAWN_LOGS
-        self.stars: list[Star] = []
         self.star_spawn_timer: float = 0.0
         self.star_cooldown: float = 0.0
-        self.star_y: float = 0.0
+        self._prev_ghost_time: float = 0.0
 
     def update(self, dt):
         self.bird.update(dt)
@@ -80,12 +80,20 @@ class HardMode(GameModeStrategy):
                 ):
                     self.star_spawn_timer = 0.0
                     self.star_cooldown = 5.0
-                    self.star_y = random.uniform(
-                        0, settings.VIRTUAL_HEIGHT - settings.STAR_SIZE
+                    self.world.stars.append(
+                        self.star_factory.create(
+                            settings.VIRTUAL_WIDTH - settings.STAR_SIZE,
+                            random.uniform(
+                                0, settings.VIRTUAL_HEIGHT - settings.STAR_SIZE
+                            ),
+                        )
                     )
-                    self.stars.append(
-                        Star(settings.VIRTUAL_WIDTH - settings.STAR_SIZE, self.star_y)
-                    )
+
+        if self._prev_ghost_time > 0 and self.bird.ghost_time_left <= 0:
+            pygame.mixer.music.load(settings.NORMAL_MUSIC_PATH)
+            pygame.mixer.music.play(loops=-1)
+
+        self._prev_ghost_time = self.bird.ghost_time_left
 
         if self.world.collides_with_ground(self.bird.get_rect()) or (
             not (self.bird.ghost_time_left > 0)
@@ -100,20 +108,13 @@ class HardMode(GameModeStrategy):
             self.score += 1
             settings.SOUNDS["score"].play()
 
-        for star in self.stars[:]:
-            star.update(dt)
-            if star.is_out_of_game():
-                self.stars.remove(star)
-            elif self.bird.ghost_time_left <= 0 and star.get_rect().colliderect(
-                self.bird.get_rect()
-            ):
+        if self.bird.ghost_time_left <= 0:
+            star = self.world.collect_star(self.bird.get_rect())
+            if star:
                 self.bird.ghost_time_left = settings.GHOST_DURATION
                 self.bird.start_ghost_pulse()
-                self.stars.remove(star)
-
-    def render(self, surface: pygame.Surface) -> None:
-        for star in self.stars:
-            star.render(surface)
+                pygame.mixer.music.load(settings.GHOST_MUSIC_PATH)
+                pygame.mixer.music.play(loops=-1)
 
     def on_input(self, input_id: str, input_data: InputData) -> None:
         if isinstance(input_data, (KeyboardData, MouseClickData, GamepadButtonData)):
