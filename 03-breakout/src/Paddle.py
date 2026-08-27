@@ -33,6 +33,7 @@ class Paddle:
         self.vx = 0
 
         self.can_catch = False
+        self.missiles = 0
 
     def resize(self, size: int) -> None:
         self.size = size
@@ -57,3 +58,10 @@ class Paddle:
 
     def render(self, surface: pygame.Surface) -> None:
         surface.blit(self.texture, (self.x, self.y), self.frames[self.skin][self.size])
+
+        if self.missiles > 0:
+            rocket = settings.TEXTURES["rocket"]
+            rw = rocket.get_width()
+            rh = rocket.get_height()
+            surface.blit(rocket, (self.x, self.y - rh))
+            surface.blit(rocket, (self.x + self.width - rw, self.y - rh))

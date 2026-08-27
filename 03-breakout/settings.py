@@ -83,6 +83,9 @@ TEXTURES = {
     "spritesheet": pygame.image.load(BASE_DIR / "assets" / "graphics" / "breakout.png"),
     "hearts": pygame.image.load(BASE_DIR / "assets" / "graphics" / "hearts.png"),
     "arrows": pygame.image.load(BASE_DIR / "assets" / "graphics" / "arrows.png"),
+    "rocket": pygame.transform.rotate(
+        pygame.image.load(BASE_DIR / "assets" / "graphics" / "rocket.png"), -90
+    ),
 }
 
 FRAMES = {

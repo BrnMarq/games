@@ -19,6 +19,7 @@ from gale.text import render_text
 
 import settings
 import src.powerups
+from src.Missile import Missile
 
 
 class PlayState(BaseState):
@@ -36,6 +37,7 @@ class PlayState(BaseState):
             + settings.PADDLE_GROW_UP_POINTS * (self.paddle.size + 1) * self.level
         )
         self.powerups = params.get("powerups", [])
+        self.missiles = params.get("missiles", [])
 
         if not params.get("resume", False):
             self.balls[0].vx = random.randint(-80, 80)
@@ -92,7 +94,9 @@ class PlayState(BaseState):
             # Chance to generate a powerup
             if random.random() < 1:
                 r = brick.get_collision_rect()
-                powerup_type = random.choice(["TwoMoreBall", "CatchBall"])
+                powerup_type = random.choice(
+                    ["TwoMoreBall", "CatchBall", "MissilePowerUp"]
+                )
                 self.powerups.append(
                     self.powerups_abstract_factory.get_factory(powerup_type).create(
                         r.centerx - 8, r.centery - 8
@@ -131,10 +135,24 @@ class PlayState(BaseState):
         # Remove powerups that are not in play
         self.powerups = [p for p in self.powerups if p.active]
 
+        # Update missiles
+        for missile in self.missiles:
+            missile.update(dt)
+
+            if missile.collides(self.brickset):
+                brick = self.brickset.get_colliding_brick(missile.get_collision_rect())
+                if brick is not None and not brick.broken:
+                    brick.hit()
+                    self.score += brick.score()
+
+        self.missiles = [m for m in self.missiles if m.active]
+
         # Check victory
         if self.brickset.size == 1 and next(
             (True for _, b in self.brickset.bricks.items() if b.broken), False
         ):
+            self.paddle.can_catch = False
+            self.paddle.missiles = 0
             self.state_machine.change(
                 "victory",
                 lives=self.lives,
@@ -185,6 +203,9 @@ class PlayState(BaseState):
         for powerup in self.powerups:
             powerup.render(surface)
 
+        for missile in self.missiles:
+            missile.render(surface)
+
     def on_input(self, input_id: str, input_data: InputData) -> None:
         if input_id == "move_left":
             if input_data.pressed:
@@ -208,10 +229,18 @@ class PlayState(BaseState):
                 points_to_next_live=self.points_to_next_live,
                 live_factor=self.live_factor,
                 powerups=self.powerups,
+                missiles=self.missiles,
             )
         elif input_id == "action" and input_data.pressed:
             if self.paddle.can_catch:
                 for ball in self.balls:
                     if ball.caught:
                         ball.release()
-                    self.paddle.can_catch = False
+                self.paddle.can_catch = False
+            if self.paddle.missiles > 0 and len(self.missiles) < 2:
+                left_x = self.paddle.x
+                right_x = self.paddle.x + self.paddle.width - 16
+                y = self.paddle.y - 32
+                self.missiles.append(Missile(left_x, y))
+                self.missiles.append(Missile(right_x, y))
+                self.paddle.missiles = 0
