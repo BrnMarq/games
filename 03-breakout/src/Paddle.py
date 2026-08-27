@@ -34,6 +34,7 @@ class Paddle:
 
         self.can_catch = False
         self.missiles = 0
+        self.mitosis_charges = 0
 
     def resize(self, size: int) -> None:
         self.size = size

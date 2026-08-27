@@ -13,6 +13,8 @@ from typing import Any, Tuple, Optional
 
 import pygame
 
+from gale.timer import Timer
+
 import settings
 from src.Paddle import Paddle
 
@@ -33,6 +35,10 @@ class Ball:
         self.caught = False
         self.paddle = None
         self.catch_offset = 0
+
+        self.alpha = 255
+        self._blink_tween = None
+        self._blink_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
     def get_collision_rect(self) -> pygame.Rect:
         return pygame.Rect(self.x, self.y, self.width, self.height)
@@ -77,6 +83,34 @@ class Ball:
         self.vx = random.randint(-80, 80)
         self.vy = random.randint(-170, -100)
 
+    def start_blink(self) -> None:
+        if self._blink_tween is not None:
+            return
+
+        def fade_out():
+            self._blink_tween = Timer.tween(
+                0.3,
+                [(self, {"alpha": 80})],
+                ease_function_name="in_out_sine",
+                on_finish=fade_in,
+            )
+
+        def fade_in():
+            self._blink_tween = Timer.tween(
+                0.3,
+                [(self, {"alpha": 255})],
+                ease_function_name="in_out_sine",
+                on_finish=fade_out,
+            )
+
+        fade_in()
+
+    def stop_blink(self) -> None:
+        if self._blink_tween is not None:
+            self._blink_tween.remove()
+            self._blink_tween = None
+        self.alpha = 255
+
     def update(self, dt: float) -> None:
         if self.caught and self.paddle is not None:
             self.x = self.paddle.x + self.catch_offset
@@ -86,9 +120,17 @@ class Ball:
             self.y += self.vy * dt
 
     def render(self, surface):
-        surface.blit(
-            self.texture, (self.x, self.y), settings.FRAMES["balls"][self.frame]
-        )
+        if self.alpha < 255:
+            self._blink_surface.fill((0, 0, 0, 0))
+            self._blink_surface.blit(
+                self.texture, (0, 0), settings.FRAMES["balls"][self.frame]
+            )
+            self._blink_surface.set_alpha(int(self.alpha))
+            surface.blit(self._blink_surface, (self.x, self.y))
+        else:
+            surface.blit(
+                self.texture, (self.x, self.y), settings.FRAMES["balls"][self.frame]
+            )
 
     @staticmethod
     def get_intersection(r1: pygame.Rect, r2: pygame.Rect) -> Optional[Tuple[int, int]]:

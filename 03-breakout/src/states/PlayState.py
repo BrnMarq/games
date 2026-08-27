@@ -8,17 +8,19 @@ alejandro.j.mujic4@gmail.com
 This file contains the class to define the Play state.
 """
 
+import math
 import random
 
 import pygame
 
-from gale.factory import AbstractFactory
+from gale.factory import AbstractFactory, Factory
 from gale.state import BaseState
 from gale.input_handler import InputData
 from gale.text import render_text
 
 import settings
 import src.powerups
+from src.Ball import Ball
 from src.Missile import Missile
 
 
@@ -45,6 +47,7 @@ class PlayState(BaseState):
             settings.SOUNDS["paddle_hit"].play()
 
         self.powerups_abstract_factory = AbstractFactory("src.powerups")
+        self.ball_factory = Factory(Ball)
 
     def update(self, dt: float) -> None:
         self.paddle.update(dt)
@@ -95,7 +98,7 @@ class PlayState(BaseState):
             if random.random() < 1:
                 r = brick.get_collision_rect()
                 powerup_type = random.choice(
-                    ["TwoMoreBall", "CatchBall", "MissilePowerUp"]
+                    ["TwoMoreBall", "CatchBall", "MissilePowerUp", "MitosisPowerUp"]
                 )
                 self.powerups.append(
                     self.powerups_abstract_factory.get_factory(powerup_type).create(
@@ -105,6 +108,12 @@ class PlayState(BaseState):
 
         # Removing all balls that are not in play
         self.balls = [ball for ball in self.balls if ball.active]
+
+        # Start blinking on any new balls if mitosis is charged
+        if self.paddle.mitosis_charges > 0:
+            for ball in self.balls:
+                if ball._blink_tween is None:
+                    ball.start_blink()
 
         self.brickset.update(dt)
 
@@ -153,6 +162,7 @@ class PlayState(BaseState):
         ):
             self.paddle.can_catch = False
             self.paddle.missiles = 0
+            self.paddle.mitosis_charges = 0
             self.state_machine.change(
                 "victory",
                 lives=self.lives,
@@ -244,3 +254,20 @@ class PlayState(BaseState):
                 self.missiles.append(Missile(left_x, y))
                 self.missiles.append(Missile(right_x, y))
                 self.paddle.missiles = 0
+            if self.paddle.mitosis_charges > 0:
+                snapshot = list(self.balls)
+                for ball in snapshot:
+                    speed = math.hypot(ball.vx, ball.vy)
+                    angle = math.atan2(ball.vy, ball.vx)
+                    for offset in [math.pi / 3, -math.pi / 3]:
+                        b = self.ball_factory.create(ball.x, ball.y)
+                        b.vx = speed * math.cos(angle + offset)
+                        b.vy = speed * math.sin(angle + offset)
+                        self.balls.append(b)
+                    b_opp = self.ball_factory.create(ball.x, ball.y)
+                    b_opp.vx = -ball.vx
+                    b_opp.vy = -ball.vy
+                    self.balls.append(b_opp)
+                    ball.stop_blink()
+                    ball.active = False
+                self.paddle.mitosis_charges -= 1
