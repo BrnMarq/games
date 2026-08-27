@@ -55,8 +55,11 @@ class PlayState(BaseState):
             if ball.collides(self.paddle):
                 settings.SOUNDS["paddle_hit"].stop()
                 settings.SOUNDS["paddle_hit"].play()
-                ball.rebound(self.paddle)
-                ball.push(self.paddle)
+                if self.paddle.can_catch and not ball.caught:
+                    ball.catch(self.paddle)
+                else:
+                    ball.rebound(self.paddle)
+                    ball.push(self.paddle)
 
             # Check collision with brickset
             if not ball.collides(self.brickset):
@@ -86,11 +89,12 @@ class PlayState(BaseState):
                 )
                 self.paddle.inc_size()
 
-            # Chance to generate two more balls
-            if random.random() < 0.1:
+            # Chance to generate a powerup
+            if random.random() < 1:
                 r = brick.get_collision_rect()
+                powerup_type = random.choice(["TwoMoreBall", "CatchBall"])
                 self.powerups.append(
-                    self.powerups_abstract_factory.get_factory("TwoMoreBall").create(
+                    self.powerups_abstract_factory.get_factory(powerup_type).create(
                         r.centerx - 8, r.centery - 8
                     )
                 )
@@ -205,3 +209,9 @@ class PlayState(BaseState):
                 live_factor=self.live_factor,
                 powerups=self.powerups,
             )
+        elif input_id == "action" and input_data.pressed:
+            if self.paddle.can_catch:
+                for ball in self.balls:
+                    if ball.caught:
+                        ball.release()
+                    self.paddle.can_catch = False

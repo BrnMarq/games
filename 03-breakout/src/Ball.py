@@ -30,6 +30,9 @@ class Ball:
         self.texture = settings.TEXTURES["spritesheet"]
         self.frame = random.randint(0, 6)
         self.active = True
+        self.caught = False
+        self.paddle = None
+        self.catch_offset = 0
 
     def get_collision_rect(self) -> pygame.Rect:
         return pygame.Rect(self.x, self.y, self.width, self.height)
@@ -53,15 +56,34 @@ class Ball:
             self.y = 0
             self.vy *= -1
         elif r.top > settings.VIRTUAL_HEIGHT:
-            settings.SOUNDS["hurt"].play()
-            self.active = False
+            if not self.caught:
+                settings.SOUNDS["hurt"].play()
+                self.active = False
 
     def collides(self, another: Any) -> bool:
         return self.get_collision_rect().colliderect(another.get_collision_rect())
 
+    def catch(self, paddle: Paddle) -> None:
+        self.caught = True
+        self.paddle = paddle
+        self.catch_offset = self.x - paddle.x
+        self.vx = 0
+        self.vy = 0
+        self.y = paddle.y - self.height
+
+    def release(self) -> None:
+        self.caught = False
+        self.paddle = None
+        self.vx = random.randint(-80, 80)
+        self.vy = random.randint(-170, -100)
+
     def update(self, dt: float) -> None:
-        self.x += self.vx * dt
-        self.y += self.vy * dt
+        if self.caught and self.paddle is not None:
+            self.x = self.paddle.x + self.catch_offset
+            self.y = self.paddle.y - self.height
+        else:
+            self.x += self.vx * dt
+            self.y += self.vy * dt
 
     def render(self, surface):
         surface.blit(
