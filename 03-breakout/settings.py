@@ -54,6 +54,8 @@ PADDLE_GROW_UP_POINTS = 200
 
 POWERUP_SPEED = 50
 
+POWERUP_CHANCE = 15
+
 BASE_DIR = Path(__file__).parent
 
 SOUNDS = {
@@ -74,6 +76,12 @@ SOUNDS = {
     "life": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "life.wav"),
     "grow_up": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "grow_up.wav"),
     "pause": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "pause.wav"),
+    "rocket_launch": pygame.mixer.Sound(
+        BASE_DIR / "assets" / "sounds" / "rocket_launch.wav"
+    ),
+    "activate_mitosis": pygame.mixer.Sound(
+        BASE_DIR / "assets" / "sounds" / "activate_mitosis.wav"
+    ),
 }
 
 TEXTURES = {

@@ -95,7 +95,7 @@ class PlayState(BaseState):
                 self.paddle.inc_size()
 
             # Chance to generate a powerup
-            if random.random() < 1:
+            if random.random() * 100 < settings.POWERUP_CHANCE:
                 r = brick.get_collision_rect()
                 powerup_type = random.choice(
                     ["TwoMoreBall", "CatchBall", "MissilePowerUp", "MitosisPowerUp"]
@@ -119,6 +119,9 @@ class PlayState(BaseState):
 
         if not self.balls:
             self.lives -= 1
+            self.paddle.can_catch = False
+            self.paddle.missiles = 0
+            self.paddle.mitosis_charges = 0
             if self.lives == 0:
                 self.state_machine.change("game_over", score=self.score)
             else:
@@ -253,6 +256,7 @@ class PlayState(BaseState):
                 y = self.paddle.y - 32
                 self.missiles.append(Missile(left_x, y))
                 self.missiles.append(Missile(right_x, y))
+                settings.SOUNDS["rocket_launch"].play()
                 self.paddle.missiles = 0
             if self.paddle.mitosis_charges > 0:
                 snapshot = list(self.balls)
@@ -271,3 +275,4 @@ class PlayState(BaseState):
                     ball.stop_blink()
                     ball.active = False
                 self.paddle.mitosis_charges -= 1
+                settings.SOUNDS["activate_mitosis"].play()
