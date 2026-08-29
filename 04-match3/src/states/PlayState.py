@@ -154,6 +154,9 @@ class PlayState(BaseState):
                             self.highlighted_j2
                         ]
 
+                        orig_x1, orig_y1 = tile1.x, tile1.y
+                        orig_x2, orig_y2 = tile2.x, tile2.y
+
                         def arrive():
                             tile1 = self.board.tiles[self.highlighted_i1][
                                 self.highlighted_j1
@@ -174,7 +177,35 @@ class PlayState(BaseState):
                                 tile1.i,
                                 tile1.j,
                             )
-                            self._calculate_matches([tile1, tile2])
+                            had_matches = self._calculate_matches([tile1, tile2])
+
+                            if not had_matches:
+                                settings.SOUNDS["error"].play()
+
+                                def on_back_arrive():
+                                    (
+                                        self.board.tiles[tile1.i][tile1.j],
+                                        self.board.tiles[tile2.i][tile2.j],
+                                    ) = (
+                                        self.board.tiles[tile2.i][tile2.j],
+                                        self.board.tiles[tile1.i][tile1.j],
+                                    )
+                                    tile1.i, tile1.j, tile2.i, tile2.j = (
+                                        tile2.i,
+                                        tile2.j,
+                                        tile1.i,
+                                        tile1.j,
+                                    )
+                                    self.active = True
+
+                                Timer.tween(
+                                    0.25,
+                                    [
+                                        (tile1, {"x": orig_x1, "y": orig_y1}),
+                                        (tile2, {"x": orig_x2, "y": orig_y2}),
+                                    ],
+                                    on_finish=on_back_arrive,
+                                )
 
                         # Swap tiles
                         Timer.tween(
@@ -188,12 +219,12 @@ class PlayState(BaseState):
 
                     self.highlighted_tile = False
 
-    def _calculate_matches(self, tiles: List) -> None:
+    def _calculate_matches(self, tiles: List) -> bool:
         matches = self.board.calculate_matches_for(tiles)
 
         if matches is None:
             self.active = True
-            return
+            return False
 
         settings.SOUNDS["match"].stop()
         settings.SOUNDS["match"].play()
@@ -212,3 +243,5 @@ class PlayState(BaseState):
                 [item[0] for item in falling_tiles]
             ),
         )
+
+        return True
