@@ -25,6 +25,8 @@ class Board:
         self.matches: List[List[Tile]] = []
         self.tiles: List[List[Tile]] = []
         self._initialize_tiles()
+        while not self.has_valid_move():
+            self._initialize_tiles()
 
     def render(self, surface: pygame.Surface) -> None:
         for row in self.tiles:
@@ -208,3 +210,47 @@ class Board:
                     tweens.append((tile, {"y": tile.i * settings.TILE_SIZE}))
 
         return tweens
+
+    def has_valid_move(self) -> bool:
+        colors = [
+            [self.tiles[i][j].color for j in range(settings.BOARD_WIDTH)]
+            for i in range(settings.BOARD_HEIGHT)
+        ]
+
+        def check_at(ci, cj):
+            c = colors[ci][cj]
+            h = 1
+            jj = cj - 1
+            while jj >= 0 and colors[ci][jj] == c:
+                h += 1
+                jj -= 1
+            jj = cj + 1
+            while jj < settings.BOARD_WIDTH and colors[ci][jj] == c:
+                h += 1
+                jj += 1
+            if h >= 3:
+                return True
+            v = 1
+            ii = ci - 1
+            while ii >= 0 and colors[ii][cj] == c:
+                v += 1
+                ii -= 1
+            ii = ci + 1
+            while ii < settings.BOARD_HEIGHT and colors[ii][cj] == c:
+                v += 1
+                ii += 1
+            return v >= 3
+
+        for i in range(settings.BOARD_HEIGHT):
+            for j in range(settings.BOARD_WIDTH):
+                if j < settings.BOARD_WIDTH - 1:
+                    colors[i][j], colors[i][j + 1] = colors[i][j + 1], colors[i][j]
+                    if check_at(i, j) or check_at(i, j + 1):
+                        return True
+                    colors[i][j], colors[i][j + 1] = colors[i][j + 1], colors[i][j]
+                if i < settings.BOARD_HEIGHT - 1:
+                    colors[i][j], colors[i + 1][j] = colors[i + 1][j], colors[i][j]
+                    if check_at(i, j) or check_at(i + 1, j):
+                        return True
+                    colors[i][j], colors[i + 1][j] = colors[i + 1][j], colors[i][j]
+        return False

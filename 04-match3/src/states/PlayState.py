@@ -267,6 +267,9 @@ class PlayState(BaseState):
         matches = self.board.calculate_matches_for(tiles)
 
         if matches is None:
+            while not self.board.has_valid_move():
+                self.board._initialize_tiles()
+
             self.active = True
             return False
 
