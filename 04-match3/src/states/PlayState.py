@@ -119,7 +119,7 @@ class PlayState(BaseState):
         if input_id == "click" and input_data.pressed:
             if not self.active:
                 return
-            
+
             pos_x, pos_y = input_data.position
             pos_x = pos_x * settings.VIRTUAL_WIDTH // settings.WINDOW_WIDTH
             pos_y = pos_y * settings.VIRTUAL_HEIGHT // settings.WINDOW_HEIGHT
@@ -152,70 +152,98 @@ class PlayState(BaseState):
             di = abs(end_i - self.drag_start_i)
             dj = abs(end_j - self.drag_start_j)
 
-            if di <= 1 and dj <= 1 and di != dj and 0 <= end_i < settings.BOARD_HEIGHT and 0 <= end_j < settings.BOARD_WIDTH:
+            if (
+                di <= 1
+                and dj <= 1
+                and di != dj
+                and 0 <= end_i < settings.BOARD_HEIGHT
+                and 0 <= end_j < settings.BOARD_WIDTH
+            ):
                 tile1 = self.drag_tile
                 tile2 = self.board.tiles[end_i][end_j]
 
                 orig_x1, orig_y1 = self.drag_start_x, self.drag_start_y
                 orig_x2, orig_y2 = tile2.x, tile2.y
 
-                def arrive():
-                    tile1 = self.board.tiles[self.drag_start_i][self.drag_start_j]
-                    tile2 = self.board.tiles[end_i][end_j]
-                    (
-                        self.board.tiles[tile1.i][tile1.j],
-                        self.board.tiles[tile2.i][tile2.j],
-                    ) = (
-                        self.board.tiles[tile2.i][tile2.j],
-                        self.board.tiles[tile1.i][tile1.j],
-                    )
-                    tile1.i, tile1.j, tile2.i, tile2.j = (
-                        tile2.i,
-                        tile2.j,
-                        tile1.i,
-                        tile1.j,
-                    )
-                    had_matches = self._calculate_matches([tile1, tile2])
-
-                    if not had_matches:
-                        settings.SOUNDS["error"].play()
-
-                        def on_back_arrive():
-                            (
-                                self.board.tiles[tile1.i][tile1.j],
-                                self.board.tiles[tile2.i][tile2.j],
-                            ) = (
-                                self.board.tiles[tile2.i][tile2.j],
-                                self.board.tiles[tile1.i][tile1.j],
-                            )
-                            tile1.i, tile1.j, tile2.i, tile2.j = (
-                                tile2.i,
-                                tile2.j,
-                                tile1.i,
-                                tile1.j,
-                            )
-                            self.active = True
-
-                        Timer.tween(
-                            0.25,
-                            [
-                                (tile1, {"x": orig_x1, "y": orig_y1}),
-                                (tile2, {"x": orig_x2, "y": orig_y2}),
-                            ],
-                            on_finish=on_back_arrive,
-                        )
-
-                # Swap tiles
-                Timer.tween(
-                    0.25,
-                    [
-                        (tile1, {"x": orig_x2, "y": orig_y2}),
-                        (tile2, {"x": orig_x1, "y": orig_y1}),
-                    ],
-                    on_finish=arrive,
+                # Temporarily swap in grid + indices to check for matches
+                (
+                    self.board.tiles[self.drag_start_i][self.drag_start_j],
+                    self.board.tiles[end_i][end_j],
+                ) = (tile2, tile1)
+                tile1.i, tile1.j, tile2.i, tile2.j = (
+                    end_i,
+                    end_j,
+                    self.drag_start_i,
+                    self.drag_start_j,
                 )
+
+                self.board.matches = []
+                has_match = self.board.calculate_matches_for([tile1, tile2]) is not None
+
+                # Swap back in grid + indices (restore state)
+                (
+                    self.board.tiles[self.drag_start_i][self.drag_start_j],
+                    self.board.tiles[end_i][end_j],
+                ) = (tile1, tile2)
+                tile1.i, tile1.j, tile2.i, tile2.j = (
+                    self.drag_start_i,
+                    self.drag_start_j,
+                    end_i,
+                    end_j,
+                )
+                self.board.matches = []
+
+                if has_match:
+                    # Valid move — animate the swap
+                    def arrive():
+                        tile1 = self.board.tiles[self.drag_start_i][self.drag_start_j]
+                        tile2 = self.board.tiles[end_i][end_j]
+                        (
+                            self.board.tiles[tile1.i][tile1.j],
+                            self.board.tiles[tile2.i][tile2.j],
+                        ) = (
+                            self.board.tiles[tile2.i][tile2.j],
+                            self.board.tiles[tile1.i][tile1.j],
+                        )
+                        tile1.i, tile1.j, tile2.i, tile2.j = (
+                            tile2.i,
+                            tile2.j,
+                            tile1.i,
+                            tile1.j,
+                        )
+                        self._calculate_matches([tile1, tile2])
+
+                    Timer.tween(
+                        0.25,
+                        [
+                            (tile1, {"x": orig_x2, "y": orig_y2}),
+                            (tile2, {"x": orig_x1, "y": orig_y1}),
+                        ],
+                        on_finish=arrive,
+                    )
+                else:
+                    # No match — snap back
+                    settings.SOUNDS["error"].play()
+
+                    def on_snap_back():
+                        self.dragging = False
+                        self.drag_tile = None
+                        self.active = True
+
+                    Timer.tween(
+                        0.15,
+                        [
+                            (
+                                self.drag_tile,
+                                {"x": self.drag_start_x, "y": self.drag_start_y},
+                            )
+                        ],
+                        on_finish=on_snap_back,
+                    )
             else:
-                # Snap back to original position
+                # Not adjacent — snap back
+                settings.SOUNDS["error"].play()
+
                 def on_snap_back():
                     self.dragging = False
                     self.drag_tile = None
@@ -223,7 +251,12 @@ class PlayState(BaseState):
 
                 Timer.tween(
                     0.15,
-                    [(self.drag_tile, {"x": self.drag_start_x, "y": self.drag_start_y})],
+                    [
+                        (
+                            self.drag_tile,
+                            {"x": self.drag_start_x, "y": self.drag_start_y},
+                        )
+                    ],
                     on_finish=on_snap_back,
                 )
 
