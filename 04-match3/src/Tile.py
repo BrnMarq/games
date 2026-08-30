@@ -20,16 +20,21 @@ class Tile:
         self.x = self.j * settings.TILE_SIZE
         self.y = self.i * settings.TILE_SIZE
         self.color = color
-        self.variety = variety
+        self.powerup = None
         self.alpha_surface = pygame.Surface(
             (settings.TILE_SIZE, settings.TILE_SIZE), pygame.SRCALPHA
         )
 
     def render(self, surface: pygame.Surface, offset_x: int, offset_y: int) -> None:
+        frame = (
+            settings.LINE_CLEAR_TILE_FRAME
+            if self.powerup == "line_clear"
+            else settings.BASE_TILE_FRAME
+        )
         self.alpha_surface.blit(
             settings.TEXTURES["tiles"],
             (0, 0),
-            settings.FRAMES["tiles"][self.color][self.variety],
+            settings.FRAMES["tiles"][self.color][frame],
         )
         pygame.draw.rect(
             self.alpha_surface,
@@ -41,5 +46,5 @@ class Tile:
         surface.blit(
             settings.TEXTURES["tiles"],
             (self.x + offset_x, self.y + offset_y),
-            settings.FRAMES["tiles"][self.color][self.variety],
+            settings.FRAMES["tiles"][self.color][frame],
         )

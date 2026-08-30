@@ -8,7 +8,7 @@ alejandro.j.mujic4@gmail.com
 This file contains the class PlayState.
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 import pygame
 
@@ -116,6 +116,28 @@ class PlayState(BaseState):
         )
 
     def on_input(self, input_id: str, input_data: InputData) -> None:
+        # Debug: spawn powerup on random tile
+        if input_id == "enter" and input_data.pressed:
+            import random
+
+            i = random.randint(0, settings.BOARD_HEIGHT - 1)
+            j = random.randint(0, settings.BOARD_WIDTH - 1)
+            self.board.tiles[i][j].powerup = "line_clear"
+            print(f"Debug: Powerup spawned at ({i}, {j})")
+            return
+
+        # Debug: force a 4-tile match at row 3
+        if input_id == "up" and input_data.pressed:
+            row = 3
+            color = self.board.tiles[row][0].color
+            for j in range(4):
+                if j == 2:
+                    self.board.tiles[row + 1][j].color = color
+                else:
+                    self.board.tiles[row][j].color = color
+            print(f"Debug: Forced 4-tile match at row {row}")
+            return
+
         if input_id == "click" and input_data.pressed:
             if not self.active:
                 return
@@ -146,6 +168,19 @@ class PlayState(BaseState):
             pos_x, pos_y = input_data.position
             pos_x = pos_x * settings.VIRTUAL_WIDTH // settings.WINDOW_WIDTH
             pos_y = pos_y * settings.VIRTUAL_HEIGHT // settings.WINDOW_HEIGHT
+
+            # Check if this was a tap (minimal movement) on a powerup tile
+            dx = pos_x - (self.drag_start_x + self.board.x + settings.TILE_SIZE // 2)
+            dy = pos_y - (self.drag_start_y + self.board.y + settings.TILE_SIZE // 2)
+            dist = (dx**2 + dy**2) ** 0.5
+
+            if dist < 5 and self.drag_tile and self.drag_tile.powerup == "line_clear":
+                tile = self.drag_tile
+                self.dragging = False
+                self.drag_tile = None
+                self._activate_line_clear(tile)
+                return
+
             end_i = (pos_y - self.board.y) // settings.TILE_SIZE
             end_j = (pos_x - self.board.x) // settings.TILE_SIZE
 
@@ -195,6 +230,8 @@ class PlayState(BaseState):
 
                 if has_match:
                     # Valid move — animate the swap
+                    moved_tile = self.drag_tile
+
                     def arrive():
                         tile1 = self.board.tiles[self.drag_start_i][self.drag_start_j]
                         tile2 = self.board.tiles[end_i][end_j]
@@ -211,7 +248,7 @@ class PlayState(BaseState):
                             tile1.i,
                             tile1.j,
                         )
-                        self._calculate_matches([tile1, tile2])
+                        self._calculate_matches([tile1, tile2], moved_tile)
 
                     Timer.tween(
                         0.25,
@@ -263,7 +300,7 @@ class PlayState(BaseState):
             self.dragging = False
             self.drag_tile = None
 
-    def _calculate_matches(self, tiles: List) -> bool:
+    def _calculate_matches(self, tiles: List, moved_tile: Optional[any] = None) -> bool:
         matches = self.board.calculate_matches_for(tiles)
 
         if matches is None:
@@ -276,10 +313,26 @@ class PlayState(BaseState):
         settings.SOUNDS["match"].stop()
         settings.SOUNDS["match"].play()
 
+        extra_destroyed = []
+
         for match in matches:
             self.score += len(match) * 50
 
+            # Check for powerup tiles in this match and activate them
+            for tile in match:
+                if tile.powerup == "line_clear":
+                    targets = self.board.get_line_clear_targets(tile)
+                    extra_destroyed.extend(targets)
+
+            # Check if this is a 4-tile match and create powerup on moved tile
+            if len(match) == 4 and moved_tile is not None and moved_tile in match:
+                moved_tile.powerup = "line_clear"
+
         self.board.remove_matches()
+
+        # Remove extra tiles from powerup activations
+        for tile in extra_destroyed:
+            self.board.tiles[tile.i][tile.j] = None
 
         falling_tiles = self.board.get_falling_tiles()
 
@@ -292,3 +345,25 @@ class PlayState(BaseState):
         )
 
         return True
+
+    def _activate_line_clear(self, tile) -> None:
+        settings.SOUNDS["match"].stop()
+        settings.SOUNDS["match"].play()
+
+        targets = self.board.get_line_clear_targets(tile)
+        all_destroyed = [tile] + targets
+
+        self.score += len(all_destroyed) * 50
+
+        for t in all_destroyed:
+            self.board.tiles[t.i][t.j] = None
+
+        falling_tiles = self.board.get_falling_tiles()
+
+        Timer.tween(
+            0.25,
+            falling_tiles,
+            on_finish=lambda: self._calculate_matches(
+                [item[0] for item in falling_tiles]
+            ),
+        )

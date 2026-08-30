@@ -58,9 +58,7 @@ class Board:
                 while self._is_match_generated(i, j, color):
                     color = random.randint(0, settings.NUM_COLORS - 1)
 
-                self.tiles[i][j] = Tile(
-                    i, j, color, random.randint(0, settings.NUM_VARIETIES - 1)
-                )
+                self.tiles[i][j] = Tile(i, j, color, settings.BASE_TILE_FRAME)
 
     def _calculate_match_rec(self, tile: Tile) -> Set[Tile]:
         if tile in self.in_stack:
@@ -154,9 +152,20 @@ class Board:
     def remove_matches(self) -> None:
         for match in self.matches:
             for tile in match:
-                self.tiles[tile.i][tile.j] = None
+                if tile.powerup is None:
+                    self.tiles[tile.i][tile.j] = None
 
         self.matches = []
+
+    def get_line_clear_targets(self, tile: Tile) -> List[Tile]:
+        targets = []
+        for di, dj in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            ni, nj = tile.i + di, tile.j + dj
+            if 0 <= ni < settings.BOARD_HEIGHT and 0 <= nj < settings.BOARD_WIDTH:
+                t = self.tiles[ni][nj]
+                if t is not None:
+                    targets.append(t)
+        return targets
 
     def get_falling_tiles(self) -> Tuple[Any, Dict[str, Any]]:
         # List of tweens to create
@@ -203,7 +212,7 @@ class Board:
                         i,
                         j,
                         random.randint(0, settings.NUM_COLORS - 1),
-                        random.randint(0, settings.NUM_VARIETIES - 1),
+                        settings.BASE_TILE_FRAME,
                     )
                     tile.y -= settings.TILE_SIZE
                     self.tiles[i][j] = tile

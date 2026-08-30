@@ -57,6 +57,9 @@ TEXTURES = {
 }
 
 FRAMES = {"tiles": generate_tile_frames(TEXTURES["tiles"])}
+BASE_TILE_FRAME = 0
+LINE_CLEAR_TILE_FRAME = 1
+BOMB_TILE_FRAME = 2
 
 SOUNDS = {
     "clock": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "clock.wav"),
