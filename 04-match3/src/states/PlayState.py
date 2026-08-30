@@ -332,7 +332,6 @@ class PlayState(BaseState):
         settings.SOUNDS["match"].stop()
         settings.SOUNDS["match"].play()
 
-        extra_destroyed = []
         activated_powerups = []
 
         for match in matches:
@@ -340,13 +339,7 @@ class PlayState(BaseState):
 
             # Check for powerup tiles in this match and activate them
             for tile in match:
-                if tile.powerup == "line_clear":
-                    targets = self.board.get_line_clear_targets(tile)
-                    extra_destroyed.extend(targets)
-                    activated_powerups.append(tile)
-                elif tile.powerup == "bomb":
-                    targets = self.board.get_bomb_targets(tile)
-                    extra_destroyed.extend(targets)
+                if tile.powerup in ("line_clear", "bomb"):
                     activated_powerups.append(tile)
 
             # Check if this is a 4-tile match and create powerup on moved tile
@@ -355,6 +348,9 @@ class PlayState(BaseState):
             # Check if this is a 5-tile match and create bomb on moved tile
             elif len(match) >= 5 and moved_tile is not None and moved_tile in match:
                 moved_tile.powerup = "bomb"
+
+        # BFS: collect ALL targets including cascade chain
+        extra_destroyed = self.board.collect_cascade_targets(activated_powerups)
 
         # Clear powerup attribute so remove_matches() will remove them
         for tile in activated_powerups:
@@ -382,8 +378,8 @@ class PlayState(BaseState):
         settings.SOUNDS["match"].stop()
         settings.SOUNDS["match"].play()
 
-        targets = self.board.get_line_clear_targets(tile)
-        all_destroyed = [tile] + targets
+        extra = self.board.collect_cascade_targets([tile])
+        all_destroyed = [tile] + extra
 
         self.score += len(all_destroyed) * 50
 
@@ -404,8 +400,8 @@ class PlayState(BaseState):
         settings.SOUNDS["match"].stop()
         settings.SOUNDS["match"].play()
 
-        targets = self.board.get_bomb_targets(tile)
-        all_destroyed = [tile] + targets
+        extra = self.board.collect_cascade_targets([tile])
+        all_destroyed = [tile] + extra
 
         self.score += len(all_destroyed) * 50
 

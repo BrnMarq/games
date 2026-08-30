@@ -180,6 +180,32 @@ class Board:
                         targets.append(t)
         return targets
 
+    def collect_cascade_targets(self, powerup_tiles: List[Tile]) -> List[Tile]:
+        all_targets = []
+        visited = set()
+        queue = list(powerup_tiles)
+
+        while queue:
+            tile = queue.pop(0)
+            if (tile.i, tile.j) in visited:
+                continue
+            visited.add((tile.i, tile.j))
+
+            if tile.powerup == "line_clear":
+                targets = self.get_line_clear_targets(tile)
+            elif tile.powerup == "bomb":
+                targets = self.get_bomb_targets(tile)
+            else:
+                continue
+
+            for t in targets:
+                if (t.i, t.j) not in visited:
+                    all_targets.append(t)
+                    if t.powerup is not None:
+                        queue.append(t)
+
+        return all_targets
+
     def get_falling_tiles(self) -> Tuple[Any, Dict[str, Any]]:
         # List of tweens to create
         tweens: Tuple[Tile, Dict[str, Any]] = []
@@ -233,46 +259,50 @@ class Board:
 
         return tweens
 
+    def _check_at(self, check_i, check_j):
+        colors = [
+            [self.tiles[i][j].color for j in range(settings.BOARD_WIDTH)]
+            for i in range(settings.BOARD_HEIGHT)
+        ]
+        color = colors[check_i][check_j]
+        h = 1
+        jj = check_j - 1
+        while jj >= 0 and colors[check_i][jj] == color:
+            h += 1
+            jj -= 1
+        jj = check_j + 1
+        while jj < settings.BOARD_WIDTH and colors[check_i][jj] == color:
+            h += 1
+            jj += 1
+        if h >= 3:
+            return True
+        v = 1
+        ii = check_i - 1
+        while ii >= 0 and colors[ii][check_j] == color:
+            v += 1
+            ii -= 1
+        ii = check_i + 1
+        while ii < settings.BOARD_HEIGHT and colors[ii][check_j] == color:
+            v += 1
+            ii += 1
+        return v >= 3
+
     def has_valid_move(self) -> bool:
         colors = [
             [self.tiles[i][j].color for j in range(settings.BOARD_WIDTH)]
             for i in range(settings.BOARD_HEIGHT)
         ]
 
-        def check_at(ci, cj):
-            c = colors[ci][cj]
-            h = 1
-            jj = cj - 1
-            while jj >= 0 and colors[ci][jj] == c:
-                h += 1
-                jj -= 1
-            jj = cj + 1
-            while jj < settings.BOARD_WIDTH and colors[ci][jj] == c:
-                h += 1
-                jj += 1
-            if h >= 3:
-                return True
-            v = 1
-            ii = ci - 1
-            while ii >= 0 and colors[ii][cj] == c:
-                v += 1
-                ii -= 1
-            ii = ci + 1
-            while ii < settings.BOARD_HEIGHT and colors[ii][cj] == c:
-                v += 1
-                ii += 1
-            return v >= 3
-
         for i in range(settings.BOARD_HEIGHT):
             for j in range(settings.BOARD_WIDTH):
                 if j < settings.BOARD_WIDTH - 1:
                     colors[i][j], colors[i][j + 1] = colors[i][j + 1], colors[i][j]
-                    if check_at(i, j) or check_at(i, j + 1):
+                    if self._check_at(i, j) or self._check_at(i, j + 1):
                         return True
                     colors[i][j], colors[i][j + 1] = colors[i][j + 1], colors[i][j]
                 if i < settings.BOARD_HEIGHT - 1:
                     colors[i][j], colors[i + 1][j] = colors[i + 1][j], colors[i][j]
-                    if check_at(i, j) or check_at(i + 1, j):
+                    if self._check_at(i, j) or self._check_at(i + 1, j):
                         return True
                     colors[i][j], colors[i + 1][j] = colors[i + 1][j], colors[i][j]
         return False

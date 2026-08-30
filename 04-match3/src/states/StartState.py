@@ -59,7 +59,13 @@ class StartState(BaseState):
         # Generate the full tile list for display
         for _ in range(settings.BOARD_WIDTH * settings.BOARD_HEIGHT):
             color = random.randint(0, settings.NUM_COLORS - 1)
-            variety = random.randint(0, settings.NUM_VARIETIES - 1)
+            variety = random.choice(
+                [
+                    settings.BASE_TILE_FRAME,
+                    settings.LINE_CLEAR_TILE_FRAME,
+                    settings.BOMB_TILE_FRAME,
+                ]
+            )
             self.frames.append(settings.FRAMES["tiles"][color][variety])
 
         # A surface that supports alpha for the screen
