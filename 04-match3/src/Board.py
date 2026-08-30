@@ -259,50 +259,51 @@ class Board:
 
         return tweens
 
-    def _check_at(self, check_i, check_j):
-        colors = [
-            [self.tiles[i][j].color for j in range(settings.BOARD_WIDTH)]
-            for i in range(settings.BOARD_HEIGHT)
-        ]
-        color = colors[check_i][check_j]
-        h = 1
-        jj = check_j - 1
-        while jj >= 0 and colors[check_i][jj] == color:
-            h += 1
-            jj -= 1
-        jj = check_j + 1
-        while jj < settings.BOARD_WIDTH and colors[check_i][jj] == color:
-            h += 1
-            jj += 1
-        if h >= 3:
+    def _check_at(self, center_row, center_col):
+        target_color = self.tiles[center_row][center_col].color
+
+        horizontal_count = 1
+        for offset in range(1, 3):
+            col = center_col - offset
+            if col < 0 or self.tiles[center_row][col].color != target_color:
+                break
+            horizontal_count += 1
+        for offset in range(1, 3):
+            col = center_col + offset
+            if col >= settings.BOARD_WIDTH or self.tiles[center_row][col].color != target_color:
+                break
+            horizontal_count += 1
+        if horizontal_count >= 3:
             return True
-        v = 1
-        ii = check_i - 1
-        while ii >= 0 and colors[ii][check_j] == color:
-            v += 1
-            ii -= 1
-        ii = check_i + 1
-        while ii < settings.BOARD_HEIGHT and colors[ii][check_j] == color:
-            v += 1
-            ii += 1
-        return v >= 3
+
+        vertical_count = 1
+        for offset in range(1, 3):
+            row = center_row - offset
+            if row < 0 or self.tiles[row][center_col].color != target_color:
+                break
+            vertical_count += 1
+        for offset in range(1, 3):
+            row = center_row + offset
+            if row >= settings.BOARD_HEIGHT or self.tiles[row][center_col].color != target_color:
+                break
+            vertical_count += 1
+        return vertical_count >= 3
 
     def has_valid_move(self) -> bool:
-        colors = [
-            [self.tiles[i][j].color for j in range(settings.BOARD_WIDTH)]
-            for i in range(settings.BOARD_HEIGHT)
-        ]
-
         for i in range(settings.BOARD_HEIGHT):
             for j in range(settings.BOARD_WIDTH):
+                if self.tiles[i][j].powerup is not None:
+                    return True
                 if j < settings.BOARD_WIDTH - 1:
-                    colors[i][j], colors[i][j + 1] = colors[i][j + 1], colors[i][j]
+                    self.tiles[i][j], self.tiles[i][j + 1] = self.tiles[i][j + 1], self.tiles[i][j]
                     if self._check_at(i, j) or self._check_at(i, j + 1):
+                        self.tiles[i][j], self.tiles[i][j + 1] = self.tiles[i][j + 1], self.tiles[i][j]
                         return True
-                    colors[i][j], colors[i][j + 1] = colors[i][j + 1], colors[i][j]
+                    self.tiles[i][j], self.tiles[i][j + 1] = self.tiles[i][j + 1], self.tiles[i][j]
                 if i < settings.BOARD_HEIGHT - 1:
-                    colors[i][j], colors[i + 1][j] = colors[i + 1][j], colors[i][j]
+                    self.tiles[i][j], self.tiles[i + 1][j] = self.tiles[i + 1][j], self.tiles[i][j]
                     if self._check_at(i, j) or self._check_at(i + 1, j):
+                        self.tiles[i][j], self.tiles[i + 1][j] = self.tiles[i + 1][j], self.tiles[i][j]
                         return True
-                    colors[i][j], colors[i + 1][j] = colors[i + 1][j], colors[i][j]
+                    self.tiles[i][j], self.tiles[i + 1][j] = self.tiles[i + 1][j], self.tiles[i][j]
         return False
