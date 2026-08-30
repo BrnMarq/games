@@ -323,9 +323,10 @@ class PlayState(BaseState):
         matches = self.board.calculate_matches_for(tiles)
 
         if matches is None:
-            while not self.board.has_valid_move():
-                self.board._initialize_tiles()
-
+            # while not self.board.has_valid_move():
+            #     self.board._initialize_tiles()
+            if not self.board.has_valid_move():
+                print("No possible move!")
             self.active = True
             return False
 
@@ -375,8 +376,8 @@ class PlayState(BaseState):
         return True
 
     def _activate_line_clear(self, tile) -> None:
-        settings.SOUNDS["match"].stop()
-        settings.SOUNDS["match"].play()
+        settings.SOUNDS["line_clear"].stop()
+        settings.SOUNDS["line_clear"].play()
 
         extra = self.board.collect_cascade_targets([tile])
         all_destroyed = [tile] + extra
@@ -397,8 +398,8 @@ class PlayState(BaseState):
         )
 
     def _activate_bomb(self, tile) -> None:
-        settings.SOUNDS["match"].stop()
-        settings.SOUNDS["match"].play()
+        settings.SOUNDS["bomb"].stop()
+        settings.SOUNDS["bomb"].play()
 
         extra = self.board.collect_cascade_targets([tile])
         all_destroyed = [tile] + extra
