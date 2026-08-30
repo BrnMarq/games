@@ -116,40 +116,6 @@ class PlayState(BaseState):
         )
 
     def on_input(self, input_id: str, input_data: InputData) -> None:
-        # Debug: spawn powerup on random tile
-        if input_id == "enter" and input_data.pressed:
-            import random
-
-            i = random.randint(0, settings.BOARD_HEIGHT - 1)
-            j = random.randint(0, settings.BOARD_WIDTH - 1)
-            self.board.tiles[i][j].powerup = "line_clear"
-            print(f"Debug: Powerup spawned at ({i}, {j})")
-            return
-
-        # Debug: force a 4-tile match at row 3
-        if input_id == "up" and input_data.pressed:
-            row = 3
-            color = self.board.tiles[row][0].color
-            for j in range(4):
-                if j == 2:
-                    self.board.tiles[row + 1][j].color = color
-                else:
-                    self.board.tiles[row][j].color = color
-            print(f"Debug: Forced 4-tile match at row {row}")
-            return
-
-        # Debug: spawn bomb powerup on random tile
-        if input_id == "down" and input_data.pressed:
-            row = 3
-            color = self.board.tiles[row][0].color
-            for j in range(5):
-                if j == 2:
-                    self.board.tiles[row + 1][j].color = color
-                else:
-                    self.board.tiles[row][j].color = color
-            print(f"Debug: Forced 4-tile match at row {row}")
-            return
-
         if input_id == "click" and input_data.pressed:
             if not self.active:
                 return
@@ -323,10 +289,8 @@ class PlayState(BaseState):
         matches = self.board.calculate_matches_for(tiles)
 
         if matches is None:
-            # while not self.board.has_valid_move():
-            #     self.board._initialize_tiles()
-            if not self.board.has_valid_move():
-                print("No possible move!")
+            while not self.board.has_valid_move():
+                self.board._initialize_tiles()
             self.active = True
             return False
 
@@ -338,28 +302,22 @@ class PlayState(BaseState):
         for match in matches:
             self.score += len(match) * 50
 
-            # Check for powerup tiles in this match and activate them
             for tile in match:
                 if tile.powerup in ("line_clear", "bomb"):
                     activated_powerups.append(tile)
 
-            # Check if this is a 4-tile match and create powerup on moved tile
             if len(match) == 4 and moved_tile is not None and moved_tile in match:
                 moved_tile.powerup = "line_clear"
-            # Check if this is a 5-tile match and create bomb on moved tile
             elif len(match) >= 5 and moved_tile is not None and moved_tile in match:
                 moved_tile.powerup = "bomb"
 
-        # BFS: collect ALL targets including cascade chain
         extra_destroyed = self.board.collect_cascade_targets(activated_powerups)
 
-        # Clear powerup attribute so remove_matches() will remove them
         for tile in activated_powerups:
             tile.powerup = None
 
         self.board.remove_matches()
 
-        # Remove extra tiles from powerup activations
         for tile in extra_destroyed:
             self.board.tiles[tile.i][tile.j] = None
 
