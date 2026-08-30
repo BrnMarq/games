@@ -314,6 +314,7 @@ class PlayState(BaseState):
         settings.SOUNDS["match"].play()
 
         extra_destroyed = []
+        activated_powerups = []
 
         for match in matches:
             self.score += len(match) * 50
@@ -323,10 +324,15 @@ class PlayState(BaseState):
                 if tile.powerup == "line_clear":
                     targets = self.board.get_line_clear_targets(tile)
                     extra_destroyed.extend(targets)
+                    activated_powerups.append(tile)
 
             # Check if this is a 4-tile match and create powerup on moved tile
             if len(match) == 4 and moved_tile is not None and moved_tile in match:
                 moved_tile.powerup = "line_clear"
+
+        # Clear powerup attribute so remove_matches() will remove them
+        for tile in activated_powerups:
+            tile.powerup = None
 
         self.board.remove_matches()
 
