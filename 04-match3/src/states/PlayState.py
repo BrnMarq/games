@@ -138,6 +138,18 @@ class PlayState(BaseState):
             print(f"Debug: Forced 4-tile match at row {row}")
             return
 
+        # Debug: spawn bomb powerup on random tile
+        if input_id == "down" and input_data.pressed:
+            row = 3
+            color = self.board.tiles[row][0].color
+            for j in range(5):
+                if j == 2:
+                    self.board.tiles[row + 1][j].color = color
+                else:
+                    self.board.tiles[row][j].color = color
+            print(f"Debug: Forced 4-tile match at row {row}")
+            return
+
         if input_id == "click" and input_data.pressed:
             if not self.active:
                 return
@@ -174,11 +186,18 @@ class PlayState(BaseState):
             dy = pos_y - (self.drag_start_y + self.board.y + settings.TILE_SIZE // 2)
             dist = (dx**2 + dy**2) ** 0.5
 
-            if dist < 5 and self.drag_tile and self.drag_tile.powerup == "line_clear":
+            if (
+                dist < 5
+                and self.drag_tile
+                and self.drag_tile.powerup in ("line_clear", "bomb")
+            ):
                 tile = self.drag_tile
                 self.dragging = False
                 self.drag_tile = None
-                self._activate_line_clear(tile)
+                if tile.powerup == "line_clear":
+                    self._activate_line_clear(tile)
+                else:
+                    self._activate_bomb(tile)
                 return
 
             end_i = (pos_y - self.board.y) // settings.TILE_SIZE
@@ -325,10 +344,17 @@ class PlayState(BaseState):
                     targets = self.board.get_line_clear_targets(tile)
                     extra_destroyed.extend(targets)
                     activated_powerups.append(tile)
+                elif tile.powerup == "bomb":
+                    targets = self.board.get_bomb_targets(tile)
+                    extra_destroyed.extend(targets)
+                    activated_powerups.append(tile)
 
             # Check if this is a 4-tile match and create powerup on moved tile
             if len(match) == 4 and moved_tile is not None and moved_tile in match:
                 moved_tile.powerup = "line_clear"
+            # Check if this is a 5-tile match and create bomb on moved tile
+            elif len(match) >= 5 and moved_tile is not None and moved_tile in match:
+                moved_tile.powerup = "bomb"
 
         # Clear powerup attribute so remove_matches() will remove them
         for tile in activated_powerups:
@@ -357,6 +383,28 @@ class PlayState(BaseState):
         settings.SOUNDS["match"].play()
 
         targets = self.board.get_line_clear_targets(tile)
+        all_destroyed = [tile] + targets
+
+        self.score += len(all_destroyed) * 50
+
+        for t in all_destroyed:
+            self.board.tiles[t.i][t.j] = None
+
+        falling_tiles = self.board.get_falling_tiles()
+
+        Timer.tween(
+            0.25,
+            falling_tiles,
+            on_finish=lambda: self._calculate_matches(
+                [item[0] for item in falling_tiles]
+            ),
+        )
+
+    def _activate_bomb(self, tile) -> None:
+        settings.SOUNDS["match"].stop()
+        settings.SOUNDS["match"].play()
+
+        targets = self.board.get_bomb_targets(tile)
         all_destroyed = [tile] + targets
 
         self.score += len(all_destroyed) * 50

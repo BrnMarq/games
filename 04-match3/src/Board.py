@@ -167,6 +167,19 @@ class Board:
                     targets.append(t)
         return targets
 
+    def get_bomb_targets(self, tile: Tile) -> List[Tile]:
+        targets = []
+        for di in [-1, 0, 1]:
+            for dj in [-1, 0, 1]:
+                if di == 0 and dj == 0:
+                    continue
+                ni, nj = tile.i + di, tile.j + dj
+                if 0 <= ni < settings.BOARD_HEIGHT and 0 <= nj < settings.BOARD_WIDTH:
+                    t = self.tiles[ni][nj]
+                    if t is not None:
+                        targets.append(t)
+        return targets
+
     def get_falling_tiles(self) -> Tuple[Any, Dict[str, Any]]:
         # List of tweens to create
         tweens: Tuple[Tile, Dict[str, Any]] = []

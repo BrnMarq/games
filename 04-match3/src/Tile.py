@@ -26,11 +26,12 @@ class Tile:
         )
 
     def render(self, surface: pygame.Surface, offset_x: int, offset_y: int) -> None:
-        frame = (
-            settings.LINE_CLEAR_TILE_FRAME
-            if self.powerup == "line_clear"
-            else settings.BASE_TILE_FRAME
-        )
+        if self.powerup == "line_clear":
+            frame = settings.LINE_CLEAR_TILE_FRAME
+        elif self.powerup == "bomb":
+            frame = settings.BOMB_TILE_FRAME
+        else:
+            frame = settings.BASE_TILE_FRAME
         self.alpha_surface.blit(
             settings.TEXTURES["tiles"],
             (0, 0),
