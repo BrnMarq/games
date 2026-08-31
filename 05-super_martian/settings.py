@@ -31,7 +31,7 @@ input_handler.InputHandler.set_mouse_click_action(input_handler.MOUSE_BUTTON_1, 
 TITLE = "Super Martian"
 
 # Size we want to emulate
-VIRTUAL_WIDTH = 400
+VIRTUAL_WIDTH = 380
 VIRTUAL_HEIGHT = 192
 
 # Size of our actual window
@@ -57,7 +57,7 @@ CAMERA_FOLLOW_RATE = 8.0
 FLYING_CREATURE_MIN_SPAWN_DELAY = 4
 FLYING_CREATURE_MAX_SPAWN_DELAY = 9
 
-NUM_LEVELS = 1
+NUM_LEVELS = 2
 
 BASE_DIR = pathlib.Path(__file__).parent
 
