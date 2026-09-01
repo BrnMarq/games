@@ -58,5 +58,31 @@ class Player(GameEntity):
         )
         self.command_bindings.bind("jump", press=JUMP, release=STOP_JUMP)
 
+    def _check_key_block(self) -> None:
+        row = int(self.y // self.tilemap.tile_height) - 1
+        if row < 0:
+            return
+
+        min_col = int(self.x // self.tilemap.tile_width)
+        max_col = int((self.x + self.width - 1e-6) // self.tilemap.tile_width)
+
+        for col in range(min_col, max_col + 1):
+            if not self.tilemap.in_bounds(row, col):
+                continue
+            gid = self.tilemap.get_gid(self.COLLISION_LAYER, row, col)
+            if gid == 0:
+                continue
+            props = self.tilemap.properties_of_gid(gid)
+            if props.get("key_block", False):
+                block_x = col * self.tilemap.tile_width
+                block_y = row * self.tilemap.tile_height
+                self.game_level.spawn_key(block_x, block_y)
+                return
+
+    def update(self, dt: float) -> None:
+        super().update(dt)
+        if self.block_hit_from_below:
+            self._check_key_block()
+
     def on_input(self, input_id: str, input_data: InputData) -> None:
         self.command_bindings.dispatch(self, input_id, input_data)

@@ -52,34 +52,12 @@ class GameEntity(mixins.DrawableMixin, mixins.AnimatedMixin, mixins.CollidableMi
         self.generate_animations(animation_defs)
         self.flipped = False
         self.is_dead = False
+        self.block_hit_from_below = False
 
     def change_state(
         self, state_id: str, *args: Tuple[Any], **kwargs: Dict[str, Any]
     ) -> None:
         self.state_machine.change(state_id, *args, **kwargs)
-
-    def _check_key_block(self) -> None:
-        # The tile row above the player's head after collision
-        row = int(self.y // self.tilemap.tile_height) - 1
-        if row < 0:
-            return
-
-        # Check each column the player overlaps
-        min_col = int(self.x // self.tilemap.tile_width)
-        max_col = int((self.x + self.width - 1e-6) // self.tilemap.tile_width)
-
-        for col in range(min_col, max_col + 1):
-            if not self.tilemap.in_bounds(row, col):
-                continue
-            gid = self.tilemap.get_gid(self.COLLISION_LAYER, row, col)
-            if gid == 0:
-                continue
-            props = self.tilemap.properties_of_gid(gid)
-            if props.get("key_block", False):
-                block_x = col * self.tilemap.tile_width
-                block_y = row * self.tilemap.tile_height
-                self.game_level.spawn_key(block_x, block_y)
-                return
 
     def update(self, dt: float) -> None:
         # Applied unconditionally (not just while jumping/falling) so the
@@ -89,6 +67,8 @@ class GameEntity(mixins.DrawableMixin, mixins.AnimatedMixin, mixins.CollidableMi
 
         self.state_machine.update(dt)
         mixins.AnimatedMixin.update(self, dt)
+
+        self.block_hit_from_below = False
 
         self.x, self.y, self.collided_x, collided_y = move_and_collide(
             self.tilemap,
@@ -105,8 +85,7 @@ class GameEntity(mixins.DrawableMixin, mixins.AnimatedMixin, mixins.CollidableMi
             if self.vy > 0:
                 self.on_ground = True
             else:
-                # Hit a block from below — check for key_block
-                self._check_key_block()
+                self.block_hit_from_below = True
             self.vy = 0
         else:
             self.on_ground = False
