@@ -29,6 +29,8 @@ class GameLevel:
         self.tilemap = load_tiled_map(settings.TILEMAPS[num_level])
         self.creatures = []
         self.items = []
+        self.key = None
+        self.key_activated = False
 
         for obj in self.tilemap.object_layers.get("creatures", []):
             self.add_creature(
@@ -72,6 +74,28 @@ class GameLevel:
                 self,
                 **definition,
             )
+        )
+
+    def spawn_key(self, block_x: float, block_y: float) -> None:
+        if self.key_activated:
+            return
+
+        self.key_activated = True
+        self.key = GameItem(
+            x=block_x,
+            y=block_y,
+            width=16,
+            height=16,
+            texture_id="items",
+            frame_index=0,
+            collidable=True,
+            consumable=True,
+            on_consume=items.pickup_key,
+        )
+
+        Timer.tween(
+            0.5,
+            [(self.key, {"y": block_y - 16})],
         )
 
     def _schedule_flying_creature_spawn(self) -> None:
@@ -141,3 +165,5 @@ class GameLevel:
         for item in self.items:
             if item.active:
                 item.render(surface, camera)
+        if self.key is not None and self.key.active:
+            self.key.render(surface, camera)

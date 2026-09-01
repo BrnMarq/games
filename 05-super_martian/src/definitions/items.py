@@ -45,6 +45,12 @@ def pickup_yellow_coin(coin: GameItem, player: Player):
     pickup_coin(coin, player, 50, 54, random.uniform(20, 25))
 
 
+def pickup_key(key: GameItem, player: Player) -> None:
+    settings.SOUNDS["pickup_coin"].stop()
+    settings.SOUNDS["pickup_coin"].play()
+    player.key_picked = True
+
+
 ITEMS: Dict[str, Dict[int, Dict[str, Any]]] = {
     "coins": {
         62: {
@@ -71,5 +77,13 @@ ITEMS: Dict[str, Dict[int, Dict[str, Any]]] = {
             "collidable": True,
             "on_consume": pickup_yellow_coin,
         },
-    }
+    },
+    "key": {
+        0: {
+            "texture_id": "items",
+            "consumable": True,
+            "collidable": True,
+            "on_consume": pickup_key,
+        },
+    },
 }

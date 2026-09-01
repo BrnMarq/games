@@ -81,6 +81,13 @@ class PlayState(BaseState):
             Timer.clear()
             self.state_machine.change("game_over", self.player)
 
+        if getattr(self.player, "key_picked", False):
+            pygame.mixer.music.stop()
+            pygame.mixer.music.unload()
+            Timer.clear()
+            self.state_machine.change("play", level=2)
+            return
+
         self.player.update(dt)
 
         if self.player.y >= self.tilemap.pixel_height:
@@ -100,6 +107,12 @@ class PlayState(BaseState):
             if self.player.collides(item):
                 item.on_collide(self.player)
                 item.on_consume(self.player)
+
+        # Check key collision
+        if self.game_level.key is not None and self.game_level.key.active:
+            if self.player.collides(self.game_level.key):
+                self.game_level.key.on_collide(self.player)
+                self.game_level.key.on_consume(self.player)
 
     def render(self, surface: pygame.Surface) -> None:
         self.game_level.render(surface, self.camera)
