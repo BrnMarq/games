@@ -31,6 +31,8 @@ class GameLevel:
         self.items = []
         self.key = None
         self.key_activated = False
+        self.key_block_gid = None
+        self.key_block_pos = None
 
         for obj in self.tilemap.object_layers.get("creatures", []):
             self.add_creature(
@@ -81,6 +83,10 @@ class GameLevel:
             return
 
         self.key_activated = True
+        self.key_block_pos = (block_x, block_y)
+        row = int(block_y // self.tilemap.tile_height)
+        col = int(block_x // self.tilemap.tile_width)
+        self.key_block_gid = self.tilemap.get_gid("ground", row, col)
         self.key = GameItem(
             x=block_x,
             y=block_y,
@@ -167,3 +173,17 @@ class GameLevel:
                 item.render(surface, camera)
         if self.key is not None and self.key.active:
             self.key.render(surface, camera)
+            self._render_key_block(surface, camera)
+
+    def _render_key_block(self, surface: pygame.Surface, camera: Any) -> None:
+        if self.key_block_gid is None or self.key_block_pos is None:
+            return
+        tileset = self.tilemap.tileset_for_gid(self.key_block_gid)
+        if tileset is None:
+            return
+        source_rect = tileset.rect_for(self.key_block_gid)
+        bx, by = self.key_block_pos
+        dest_rect = camera.apply(
+            pygame.Rect(bx, by, self.tilemap.tile_width, self.tilemap.tile_height)
+        )
+        surface.blit(tileset.image, dest_rect, source_rect)
