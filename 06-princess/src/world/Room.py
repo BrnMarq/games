@@ -322,6 +322,7 @@ class Room:
             if adjacent:
                 obj.state = "open"
                 settings.SOUNDS["door"].play()
+                player.has_bow = True
                 return
 
     def _generate_walls_and_floors(self) -> None:
@@ -416,7 +417,7 @@ class Room:
 
         switch.on_collide = open_all_doors
 
-        if random.randint(1, 1) == 1:
+        if random.randint(1, 1) == 1 and not self.player.has_bow:
             chest = GameObject(
                 GAME_OBJECT_DEFS["chest"],
                 random.randint(
