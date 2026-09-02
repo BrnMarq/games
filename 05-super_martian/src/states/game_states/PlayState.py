@@ -161,9 +161,10 @@ class PlayState(BaseState):
         )
 
         if self.fade_alpha > 0:
-            overlay = pygame.Surface((settings.VIRTUAL_WIDTH, settings.VIRTUAL_HEIGHT))
-            overlay.fill((0, 0, 0))
-            overlay.set_alpha(int(self.fade_alpha))
+            overlay = pygame.Surface(
+                (settings.VIRTUAL_WIDTH, settings.VIRTUAL_HEIGHT), pygame.SRCALPHA
+            )
+            overlay.fill((0, 0, 0, int(self.fade_alpha)))
             surface.blit(overlay, (0, 0))
 
     def on_input(self, input_id: str, input_data: InputData) -> None:
