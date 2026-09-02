@@ -49,6 +49,8 @@ class PlayerWalkState(BaseEntityState):
             if player.state_machine.current is not self:
                 return
 
+            self.dungeon.current_room.open_adjacent_chest(player)
+
         held = player.held
 
         if held["move_left"]:

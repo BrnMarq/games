@@ -59,11 +59,38 @@ TILE_BOTTOM_RIGHT_CORNER = 24
 TILE_EMPTY = 19
 
 TILE_FLOORS = [
-    7, 8, 9, 10, 11, 12, 13,
-    26, 27, 28, 29, 30, 31, 32,
-    45, 46, 47, 48, 49, 50, 51,
-    64, 65, 66, 67, 68, 69, 70,
-    88, 89, 107, 108,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    88,
+    89,
+    107,
+    108,
 ]
 
 TILE_TOP_WALLS = [58, 59, 60]
@@ -71,9 +98,14 @@ TILE_BOTTOM_WALLS = [79, 80, 81]
 TILE_LEFT_WALLS = [77, 96, 115]
 TILE_RIGHT_WALLS = [78, 97, 116]
 
+TILE_OPEN_CHEST = 128
+TILE_CLOSED_CHEST = 167
+
 TEXTURES = {
     "tiles": pygame.image.load(BASE_DIR / "assets" / "graphics" / "tilesheet.png"),
-    "background": pygame.image.load(BASE_DIR / "assets" / "graphics" / "background.png"),
+    "background": pygame.image.load(
+        BASE_DIR / "assets" / "graphics" / "background.png"
+    ),
     "character-walk": pygame.image.load(
         BASE_DIR / "assets" / "graphics" / "character_walk.png"
     ),
@@ -104,8 +136,12 @@ FRAMES = {
     "hearts": frames.generate_frames(TEXTURES["hearts"], 16, 16),
     "switches": frames.generate_frames(TEXTURES["switches"], 16, 18),
     "entities": frames.generate_frames(TEXTURES["entities"], 16, 16),
-    "character-pot-lift": frames.generate_frames(TEXTURES["character-pot-lift"], 16, 32),
-    "character-pot-walk": frames.generate_frames(TEXTURES["character-pot-walk"], 16, 32),
+    "character-pot-lift": frames.generate_frames(
+        TEXTURES["character-pot-lift"], 16, 32
+    ),
+    "character-pot-walk": frames.generate_frames(
+        TEXTURES["character-pot-walk"], 16, 32
+    ),
 }
 
 

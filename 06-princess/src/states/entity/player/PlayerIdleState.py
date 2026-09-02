@@ -46,6 +46,8 @@ class PlayerIdleState(BaseEntityState):
             if self.entity.state_machine.current is not self:
                 return
 
+            self.dungeon.current_room.open_adjacent_chest(self.entity)
+
         held = self.entity.held
 
         if held["move_left"] or held["move_right"] or held["move_up"] or held["move_down"]:

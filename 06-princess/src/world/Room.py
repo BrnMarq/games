@@ -39,24 +39,32 @@ _ENEMY_TYPES = ["skeleton", "slime", "bat", "ghost", "spider"]
 _DOORWAY_ZONES = {
     "left": pygame.Rect(
         -settings.TILE_SIZE - 6,
-        settings.MAP_RENDER_OFFSET_Y + settings.MAP_HEIGHT // 2 * settings.TILE_SIZE - settings.TILE_SIZE * 2,
+        settings.MAP_RENDER_OFFSET_Y
+        + settings.MAP_HEIGHT // 2 * settings.TILE_SIZE
+        - settings.TILE_SIZE * 2,
         settings.TILE_SIZE * 2 + 6,
         settings.TILE_SIZE * 3,
     ),
     "right": pygame.Rect(
         settings.MAP_RENDER_OFFSET_X + settings.MAP_WIDTH * settings.TILE_SIZE - 6,
-        settings.MAP_RENDER_OFFSET_Y + settings.MAP_HEIGHT // 2 * settings.TILE_SIZE - settings.TILE_SIZE * 2,
+        settings.MAP_RENDER_OFFSET_Y
+        + settings.MAP_HEIGHT // 2 * settings.TILE_SIZE
+        - settings.TILE_SIZE * 2,
         settings.TILE_SIZE * 2 + 6,
         settings.TILE_SIZE * 3,
     ),
     "top": pygame.Rect(
-        settings.MAP_RENDER_OFFSET_X + settings.MAP_WIDTH // 2 * settings.TILE_SIZE - settings.TILE_SIZE,
+        settings.MAP_RENDER_OFFSET_X
+        + settings.MAP_WIDTH // 2 * settings.TILE_SIZE
+        - settings.TILE_SIZE,
         -settings.TILE_SIZE - 6,
         settings.TILE_SIZE * 2,
         settings.TILE_SIZE * 2 + 12,
     ),
     "bottom": pygame.Rect(
-        settings.MAP_RENDER_OFFSET_X + settings.MAP_WIDTH // 2 * settings.TILE_SIZE - settings.TILE_SIZE,
+        settings.MAP_RENDER_OFFSET_X
+        + settings.MAP_WIDTH // 2 * settings.TILE_SIZE
+        - settings.TILE_SIZE,
         settings.VIRTUAL_HEIGHT - settings.TILE_SIZE - 6,
         settings.TILE_SIZE * 2,
         settings.TILE_SIZE * 2 + 12,
@@ -92,7 +100,9 @@ class Room:
         self.width = settings.MAP_WIDTH
         self.height = settings.MAP_HEIGHT
 
-        self.tilemap = TileMap(settings.TILE_SIZE, settings.TILE_SIZE, self.width, self.height)
+        self.tilemap = TileMap(
+            settings.TILE_SIZE, settings.TILE_SIZE, self.width, self.height
+        )
         self.tilemap.add_tileset(settings.TILESET)
         self._generate_walls_and_floors()
 
@@ -241,15 +251,77 @@ class Room:
             obj_row = int((obj.y + obj.height / 2) // settings.TILE_SIZE)
 
             adjacent = (
-                (player.direction == "right" and obj_row == player_row and obj_col == player_col + 1)
-                or (player.direction == "left" and obj_row == player_row and obj_col == player_col - 1)
-                or (player.direction == "up" and obj_col == player_col and obj_row == player_row - 1)
-                or (player.direction == "down" and obj_col == player_col and obj_row == player_row + 1)
+                (
+                    player.direction == "right"
+                    and obj_row == player_row
+                    and obj_col == player_col + 1
+                )
+                or (
+                    player.direction == "left"
+                    and obj_row == player_row
+                    and obj_col == player_col - 1
+                )
+                or (
+                    player.direction == "up"
+                    and obj_col == player_col
+                    and obj_row == player_row - 1
+                )
+                or (
+                    player.direction == "down"
+                    and obj_col == player_col
+                    and obj_row == player_row + 1
+                )
             )
 
             if adjacent:
                 self.objects.remove(obj)
                 player.change_state("pot-lift", pot=obj)
+                return
+
+    def open_adjacent_chest(self, player: TypeVar("Player")) -> None:
+        """
+        Looks for a closed chest directly in front of the player (one
+        tile away, in the direction they're currently facing) and, if
+        found, opens it.
+        """
+        player_y = player.y + player.height / 2
+        player_height = player.height - player.height / 2
+        player_col = int((player.x + player.width / 2) // settings.TILE_SIZE)
+        player_row = int((player_y + player_height / 2) // settings.TILE_SIZE)
+
+        for obj in self.objects:
+            if obj.type != "chest" or obj.state != "closed":
+                continue
+
+            obj_col = int((obj.x + obj.width / 2) // settings.TILE_SIZE)
+            obj_row = int((obj.y + obj.height / 2) // settings.TILE_SIZE)
+
+            adjacent = (
+                (
+                    player.direction == "right"
+                    and obj_row == player_row
+                    and obj_col == player_col + 1
+                )
+                or (
+                    player.direction == "left"
+                    and obj_row == player_row
+                    and obj_col == player_col - 1
+                )
+                or (
+                    player.direction == "up"
+                    and obj_col == player_col
+                    and obj_row == player_row - 1
+                )
+                or (
+                    player.direction == "down"
+                    and obj_col == player_col
+                    and obj_row == player_row + 1
+                )
+            )
+
+            if adjacent:
+                obj.state = "open"
+                settings.SOUNDS["door"].play()
                 return
 
     def _generate_walls_and_floors(self) -> None:
@@ -343,6 +415,23 @@ class Room:
                 settings.SOUNDS["door"].play()
 
         switch.on_collide = open_all_doors
+
+        if random.randint(1, 1) == 1:
+            chest = GameObject(
+                GAME_OBJECT_DEFS["chest"],
+                random.randint(
+                    settings.MAP_RENDER_OFFSET_X + settings.TILE_SIZE,
+                    settings.VIRTUAL_WIDTH - settings.TILE_SIZE * 2 - 16,
+                ),
+                random.randint(
+                    settings.MAP_RENDER_OFFSET_Y + settings.TILE_SIZE,
+                    settings.MAP_HEIGHT * settings.TILE_SIZE
+                    + settings.MAP_RENDER_OFFSET_Y
+                    - settings.TILE_SIZE
+                    - 16,
+                ),
+            )
+            self.objects.append(chest)
 
         for y in range(2, self.height):
             for x in range(2, self.width):
