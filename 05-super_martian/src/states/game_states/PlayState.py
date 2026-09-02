@@ -74,6 +74,11 @@ class PlayState(BaseState):
         else:
             Timer.resume()
 
+        self.fading_out = False
+        self.fade_alpha = 255 if enter_params.get("fade_in", False) else 0
+        if self.fade_alpha == 255:
+            Timer.tween(1, [(self, {"fade_alpha": 0})])
+
     def update(self, dt: float) -> None:
         if self.player.is_dead:
             pygame.mixer.music.stop()
@@ -82,10 +87,21 @@ class PlayState(BaseState):
             self.state_machine.change("game_over", self.player)
 
         if getattr(self.player, "key_picked", False):
-            pygame.mixer.music.stop()
-            pygame.mixer.music.unload()
-            Timer.clear()
-            self.state_machine.change("play", level=2)
+            if not self.fading_out:
+                self.fading_out = True
+                pygame.mixer.music.stop()
+                pygame.mixer.music.unload()
+                Timer.clear()
+
+                def on_fade_out_complete():
+                    next_level = (self.level % settings.NUM_LEVELS) + 1
+                    self.state_machine.change("play", level=next_level, fade_in=True)
+
+                Timer.tween(
+                    0.5,
+                    [(self, {"fade_alpha": 255})],
+                    on_finish=on_fade_out_complete,
+                )
             return
 
         self.player.update(dt)
@@ -143,6 +159,12 @@ class PlayState(BaseState):
             (255, 255, 255),
             shadowed=True,
         )
+
+        if self.fade_alpha > 0:
+            overlay = pygame.Surface((settings.VIRTUAL_WIDTH, settings.VIRTUAL_HEIGHT))
+            overlay.fill((0, 0, 0))
+            overlay.set_alpha(int(self.fade_alpha))
+            surface.blit(overlay, (0, 0))
 
     def on_input(self, input_id: str, input_data: InputData) -> None:
         if input_id == "pause" and input_data.pressed:
