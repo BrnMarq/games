@@ -33,6 +33,8 @@ class GameLevel:
         self.key_activated = False
         self.key_block_gid = None
         self.key_block_pos = None
+        self.key_block_tiles = []
+        self.key_block_revealed = False
 
         for obj in self.tilemap.object_layers.get("creatures", []):
             self.add_creature(
@@ -57,6 +59,7 @@ class GameLevel:
                 }
             )
 
+        self._hide_key_block_tiles()
         self._schedule_flying_creature_spawn()
 
     def add_item(self, item_data: Dict[str, Any]) -> None:
@@ -77,6 +80,30 @@ class GameLevel:
                 **definition,
             )
         )
+
+    def _hide_key_block_tiles(self) -> None:
+        ground = self.tilemap.get_layer("ground")
+        for row in range(self.tilemap.rows):
+            for col in range(self.tilemap.cols):
+                gid = ground[row][col]
+                if gid == 0:
+                    continue
+                props = self.tilemap.properties_of_gid(gid)
+                if props.get("key_block", False):
+                    self.key_block_tiles.append((row, col, gid))
+                    ground[row][col] = 0
+
+    def reveal_key_block(self) -> None:
+        if self.key_block_revealed:
+            return
+
+        self.key_block_revealed = True
+        ground = self.tilemap.get_layer("ground")
+        for row, col, gid in self.key_block_tiles:
+            ground[row][col] = gid
+
+        settings.SOUNDS["reveal_keyblock"].play()
+        Timer.clear()
 
     def spawn_key(self, block_x: float, block_y: float) -> None:
         if self.key_activated:
@@ -163,6 +190,10 @@ class GameLevel:
         self.creatures = [
             creature for creature in self.creatures if not creature.is_dead
         ]
+
+        if self.key_block_revealed:
+            for item in self.items:
+                item.active = False
 
     def render(self, surface: pygame.Surface, camera: Any) -> None:
         self.tilemap.render(surface, camera)

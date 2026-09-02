@@ -46,8 +46,7 @@ def pickup_yellow_coin(coin: GameItem, player: Player):
 
 
 def pickup_key(key: GameItem, player: Player) -> None:
-    settings.SOUNDS["pickup_coin"].stop()
-    settings.SOUNDS["pickup_coin"].play()
+    settings.SOUNDS["key"].play()
     player.key_picked = True
 
 

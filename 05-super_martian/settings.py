@@ -59,6 +59,8 @@ FLYING_CREATURE_MAX_SPAWN_DELAY = 9
 
 NUM_LEVELS = 2
 
+SCORE_OBJECTIVE = 100
+
 BASE_DIR = pathlib.Path(__file__).parent
 
 TILEMAPS = {
@@ -87,6 +89,10 @@ SOUNDS = {
     "jump": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "jump.wav"),
     "timer": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "timer.wav"),
     "count": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "count.wav"),
+    "reveal_keyblock": pygame.mixer.Sound(
+        BASE_DIR / "assets" / "sounds" / "reveal_keyblock.wav"
+    ),
+    "key": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "key.wav"),
 }
 
 SOUNDS["pickup_coin"].set_volume(0.5)

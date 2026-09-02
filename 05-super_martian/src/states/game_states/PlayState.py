@@ -108,6 +108,12 @@ class PlayState(BaseState):
                 item.on_collide(self.player)
                 item.on_consume(self.player)
 
+        if (
+            not self.game_level.key_block_revealed
+            and self.player.score >= settings.SCORE_OBJECTIVE
+        ):
+            self.game_level.reveal_key_block()
+
         # Check key collision
         if self.game_level.key is not None and self.game_level.key.active:
             if self.player.collides(self.game_level.key):
