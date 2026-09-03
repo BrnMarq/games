@@ -35,8 +35,9 @@ class PlayerPotIdleState(BaseEntityState):
     def update(self, dt: float) -> None:
         self.entity.sword_requested = False
 
-        if self.entity.interact_requested:
+        if self.entity.interact_requested or self.entity.bow_requested:
             self.entity.interact_requested = False
+            self.entity.bow_requested = False
             self.dungeon.current_room.projectiles.append(
                 Projectile(self.pot, self.entity.direction)
             )

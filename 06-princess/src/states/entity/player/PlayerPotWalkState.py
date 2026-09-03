@@ -42,8 +42,9 @@ class PlayerPotWalkState(BaseEntityState):
 
         player.sword_requested = False
 
-        if player.interact_requested:
+        if player.interact_requested or player.bow_requested:
             player.interact_requested = False
+            player.bow_requested = False
             self.dungeon.current_room.projectiles.append(
                 Projectile(self.pot, player.direction)
             )
