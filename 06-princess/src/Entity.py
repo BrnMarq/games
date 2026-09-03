@@ -61,6 +61,7 @@ class Entity:
         self.is_boss = False
         self.sword_invulnerable = False
         self.sword_invulnerability_timer = 0.0
+        self.stun_cooldown_timer = 0.0
 
         # Flags for flashing the entity when hit.
         self.invulnerable = False
@@ -144,6 +145,10 @@ class Entity:
             if self.sword_invulnerability_timer <= 0 and self.is_boss:
                 self.sword_invulnerable = True
                 self.sword_invulnerability_timer = 0.0
+                self.stun_cooldown_timer = settings.BOSS_STUN_COOLDOWN
+
+        if self.stun_cooldown_timer > 0:
+            self.stun_cooldown_timer -= dt
 
         self.state_machine.update(dt)
 

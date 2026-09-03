@@ -102,6 +102,9 @@ TILE_RIGHT_WALLS = [78, 97, 116]
 TILE_OPEN_CHEST = 128
 TILE_CLOSED_CHEST = 167
 
+BOSS_VULNERABLE_DURATION = 2.0
+BOSS_STUN_COOLDOWN = 3.0
+
 TEXTURES = {
     "tiles": pygame.image.load(BASE_DIR / "assets" / "graphics" / "tilesheet.png"),
     "background": pygame.image.load(
@@ -191,7 +194,3 @@ MUSIC = {
 COLOR_TITLE_SHADOW = (34, 34, 34)
 COLOR_TITLE = (175, 53, 42)
 COLOR_WHITE = (255, 255, 255)
-
-# Boss settings
-BOSS_VULNERABLE_DURATION = 2.0
-

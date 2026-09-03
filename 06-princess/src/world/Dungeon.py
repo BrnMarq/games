@@ -52,7 +52,7 @@ class Dungeon:
 
         # After obtaining the bow, there is a 1-in-5 chance each room
         # transition spawns a boss room instead of a normal one.
-        if self.player.has_bow and random.randint(1, 5) == 1:
+        if self.player.has_bow and random.randint(1, 1) == 1:
             if shift_x > 0:
                 entry_direction = "left"
             elif shift_x < 0:
