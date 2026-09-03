@@ -75,7 +75,19 @@ class Projectile:
     def render(
         self, surface: pygame.Surface, offset_x: float = 0, offset_y: float = 0
     ) -> None:
-        self.obj.render(surface, offset_x, offset_y)
+        _DIRECTION_ANGLES = {"up": 0, "down": 180, "left": 90, "right": -90}
+        angle = _DIRECTION_ANGLES.get(self.direction)
+
+        if angle is None or angle == 0:
+            # No rotation needed — delegate normally.
+            self.obj.render(surface, offset_x, offset_y)
+            return
+
+        # Grab the sub-surface for the current frame, rotate it, then blit.
+        frame_rect = settings.frame(self.obj.texture_id, self.obj.states[self.obj.state].get("frame", self.obj.frame_index))
+        sprite = settings.TEXTURES[self.obj.texture_id].subsurface(frame_rect)
+        rotated = pygame.transform.rotate(sprite, angle)
+        surface.blit(rotated, (self.obj.x + offset_x, self.obj.y + offset_y))
 
     def collides(self, target: Any) -> bool:
         return self.get_collision_rect().colliderect(target.get_collision_rect())
