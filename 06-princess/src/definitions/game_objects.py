@@ -61,14 +61,14 @@ GAME_OBJECT_DEFS: Dict[str, Dict[str, Any]] = {
     },
     "arrow": {
         "type": "arrow",
-        "texture": "arrow",
-        "frame": 1,
-        "width": 8,
-        "height": 8,
+        "texture": "bow-arrow",
+        "frame": 3,
+        "width": 16,
+        "height": 16,
         "solid": False,
         "default_state": "default",
         "states": {
-            "default": {"frame": 1},
+            "default": {"frame": 3},
         },
     },
     # Definition of heart as a consumable object type.

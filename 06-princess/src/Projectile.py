@@ -75,7 +75,7 @@ class Projectile:
     def render(
         self, surface: pygame.Surface, offset_x: float = 0, offset_y: float = 0
     ) -> None:
-        _DIRECTION_ANGLES = {"up": 0, "down": 180, "left": 90, "right": -90}
+        _DIRECTION_ANGLES = {"up": 90, "down": -90, "left": 180, "right": 0}
         angle = _DIRECTION_ANGLES.get(self.direction)
 
         if angle is None or angle == 0:
