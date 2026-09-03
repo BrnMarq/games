@@ -9,6 +9,7 @@ This file contains the class Dungeon.
 """
 
 import math
+import random
 from typing import Callable, TypeVar
 
 import pygame
@@ -16,6 +17,7 @@ import pygame
 from gale.timer import Timer
 
 import settings
+from src.world.BossRoom import BossRoom
 from src.world.Room import Room
 
 
@@ -47,7 +49,23 @@ class Dungeon:
         PlayerWalkState/PlayerPotWalkState.
         """
         self.shifting = True
-        self.next_room = Room(self.player, self.on_game_over)
+
+        # After obtaining the bow, there is a 1-in-5 chance each room
+        # transition spawns a boss room instead of a normal one.
+        if self.player.has_bow and random.randint(1, 5) == 1:
+            if shift_x > 0:
+                entry_direction = "left"
+            elif shift_x < 0:
+                entry_direction = "right"
+            elif shift_y > 0:
+                entry_direction = "top"
+            else:
+                entry_direction = "bottom"
+            self.next_room = BossRoom(
+                self.player, self.on_game_over, entry_direction
+            )
+        else:
+            self.next_room = Room(self.player, self.on_game_over)
 
         # Start all doors in next room as open until we get in.
         for doorway in self.next_room.doorways:

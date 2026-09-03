@@ -56,6 +56,7 @@ class Entity:
 
         self.walk_speed = walk_speed
         self.health = health
+        self.contact_damage = 1
 
         # Flags for flashing the entity when hit.
         self.invulnerable = False

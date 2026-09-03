@@ -82,7 +82,9 @@ def _doorway_opening_for(
     """
     for direction, zone in _DOORWAY_ZONES.items():
         if zone.colliderect(rect):
-            return doorways_by_direction[direction].get_collision_rect()
+            doorway = doorways_by_direction.get(direction)
+            if doorway is not None:
+                return doorway.get_collision_rect()
 
     return None
 
@@ -133,6 +135,7 @@ class Room:
         self.adjacent_offset_y = 0
 
         self.projectiles: List[Any] = []
+        self.enemy_projectiles: List[Any] = []
 
     def update(self, dt: float) -> None:
         # Don't update anything if we are sliding to another room.
@@ -164,7 +167,7 @@ class Room:
                 and not self.player.invulnerable
             ):
                 settings.SOUNDS["hit-player"].play()
-                self.player.damage(1)
+                self.player.damage(entity.contact_damage)
                 self.player.go_invulnerable(1.5)
 
                 if self.player.health == 0:
@@ -199,6 +202,24 @@ class Room:
 
             if projectile.dead:
                 self.projectiles.remove(projectile)
+
+        for projectile in list(self.enemy_projectiles):
+            projectile.update(dt)
+
+            if (
+                not projectile.dead
+                and not self.player.invulnerable
+                and projectile.collides(self.player)
+            ):
+                settings.SOUNDS["hit-player"].play()
+                self.player.damage(self.player.health)
+                projectile.dead = True
+
+                if self.player.health <= 0:
+                    self.on_game_over()
+
+            if projectile.dead:
+                self.enemy_projectiles.remove(projectile)
 
     def _push_player_out_of(self, obj: GameObject) -> None:
         player = self.player
@@ -507,3 +528,6 @@ class Room:
                 projectile.get_collision_rect(), self._doorways_by_direction
             ):
                 projectile.render(surface, camera_offset_x, camera_offset_y)
+
+        for projectile in self.enemy_projectiles:
+            projectile.render(surface, offset_x, offset_y)
