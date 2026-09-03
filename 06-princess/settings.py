@@ -123,6 +123,9 @@ TEXTURES = {
         BASE_DIR / "assets" / "graphics" / "character_pot_walk.png"
     ),
     "bow-arrow": pygame.image.load(BASE_DIR / "assets" / "graphics" / "bow_and_arrows.png"),
+    "character-shoot-bow": pygame.image.load(
+        BASE_DIR / "assets" / "graphics" / "character_shoot_bow.png"
+    ),
 }
 
 # Used by Room's gale.tilemap.TileMap: TILE_* ids above are 1-based,
@@ -145,6 +148,9 @@ FRAMES = {
         TEXTURES["character-pot-walk"], 16, 32
     ),
     "bow-arrow": frames.generate_frames(TEXTURES["bow-arrow"], 16, 16),
+    "character-shoot-bow": frames.generate_frames(
+        TEXTURES["character-shoot-bow"], 32, 32
+    ),
 }
 
 
