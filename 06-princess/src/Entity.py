@@ -58,6 +58,10 @@ class Entity:
         self.health = health
         self.contact_damage = 1
 
+        self.is_boss = False
+        self.sword_invulnerable = False
+        self.sword_invulnerability_timer = 0.0
+
         # Flags for flashing the entity when hit.
         self.invulnerable = False
         self.invulnerable_duration = 0.0
@@ -134,6 +138,12 @@ class Entity:
                 self.invulnerable_timer = 0
                 self.invulnerable_duration = 0
                 self.flash_timer = 0
+
+        if self.sword_invulnerability_timer > 0:
+            self.sword_invulnerability_timer -= dt
+            if self.sword_invulnerability_timer <= 0 and self.is_boss:
+                self.sword_invulnerable = True
+                self.sword_invulnerability_timer = 0.0
 
         self.state_machine.update(dt)
 

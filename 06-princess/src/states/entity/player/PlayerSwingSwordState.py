@@ -71,9 +71,14 @@ class PlayerSwingSwordState(BaseEntityState):
             return
 
         for entity in self.dungeon.current_room.entities:
-            if entity.collides(self.sword_hitbox):
-                entity.damage(1)
-                settings.SOUNDS["hit-enemy"].play()
+            if not entity.invulnerable and entity.collides(self.sword_hitbox):
+                if getattr(entity, "sword_invulnerable", False):
+                    # Do no damage, but prevent continuous hitting
+                    entity.go_invulnerable(0.5)
+                else:
+                    entity.damage(1)
+                    settings.SOUNDS["hit-enemy"].play()
+                    entity.go_invulnerable(0.5)
 
         if self.entity.current_animation.times_played > 0:
             self.entity.current_animation.times_played = 0

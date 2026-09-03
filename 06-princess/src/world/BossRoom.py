@@ -15,6 +15,7 @@ from src.Entity import Entity
 from src.states.entity.boss.BossIdleState import BossIdleState
 from src.states.entity.boss.BossWalkState import BossWalkState
 from src.states.entity.boss.BossAttackState import BossAttackState
+from src.states.entity.boss.BossStunnedState import BossStunnedState
 from src.world.Room import Room
 
 
@@ -55,12 +56,14 @@ class BossRoom(Room):
             width=16,
             height=22,
             walk_speed=definition["walk_speed"],
-            health=5,
+            health=10,
             animation_defs=definition["animations"],
             states={},
         )
         boss.contact_damage = 2
         boss.offset_y = 5
+        boss.is_boss = True
+        boss.sword_invulnerable = True
 
         # Give the boss a back-reference to the room so its states can
         # access enemy_projectiles / player without passing room through
@@ -71,6 +74,7 @@ class BossRoom(Room):
             "walk": lambda sm, e=boss: BossWalkState(e, sm),
             "idle": lambda sm, e=boss: BossIdleState(e, sm),
             "attack": lambda sm, e=boss: BossAttackState(e, sm),
+            "stunned": lambda sm, e=boss: BossStunnedState(e, sm),
         }
         boss.change_state("idle")
 
@@ -94,3 +98,29 @@ class BossRoom(Room):
                 if doorway.direction == self.entry_direction:
                     doorway.open = True
             settings.SOUNDS["door"].play()
+    # ------------------------------------------------------------------
+    # Render
+    # ------------------------------------------------------------------
+
+    def render(
+        self,
+        surface: pygame.Surface,
+        camera_offset_x: float = 0,
+        camera_offset_y: float = 0,
+    ) -> None:
+        super().render(surface, camera_offset_x, camera_offset_y)
+
+        if not self.boss_defeated and self.entities:
+            boss = self.entities[0]
+            font = settings.FONTS["princess-small"]
+            
+            # Use red text if vulnerable, white if invulnerable
+            color = settings.COLOR_TITLE if not boss.sword_invulnerable else settings.COLOR_WHITE
+            
+            text = font.render(f"Boss HP: {boss.health}/10", True, color)
+            x = settings.VIRTUAL_WIDTH // 2 - text.get_width() // 2
+            y = 10
+            
+            shadow = font.render(f"Boss HP: {boss.health}/10", True, settings.COLOR_TITLE_SHADOW)
+            surface.blit(shadow, (x + 1, y + 1))
+            surface.blit(text, (x, y))

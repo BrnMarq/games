@@ -196,8 +196,14 @@ class Room:
                     break
 
                 if not entity.dead and projectile.collides(entity):
-                    entity.damage(1)
-                    settings.SOUNDS["hit-enemy"].play()
+                    if entity.is_boss and getattr(projectile.obj, "type", None) == "arrow":
+                        entity.sword_invulnerable = False
+                        entity.sword_invulnerability_timer = settings.BOSS_VULNERABLE_DURATION
+                        entity.change_state("stunned")
+                        settings.SOUNDS["hit-enemy"].play()
+                    else:
+                        entity.damage(1)
+                        settings.SOUNDS["hit-enemy"].play()
                     projectile.dead = True
 
             if projectile.dead:
