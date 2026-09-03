@@ -19,9 +19,10 @@ _MAX_TILES = 4
 
 
 class Projectile:
-    def __init__(self, obj: Any, direction: str) -> None:
+    def __init__(self, obj: Any, direction: str, max_tiles: int = _MAX_TILES) -> None:
         self.obj = obj
         self.direction = direction
+        self.max_tiles = max_tiles
         self.distance = 0.0
         self.dead = False
 
@@ -69,7 +70,7 @@ class Projectile:
 
         self.distance += d
 
-        if self.distance > _MAX_TILES * settings.TILE_SIZE:
+        if self.distance > self.max_tiles * settings.TILE_SIZE:
             self.dead = True
 
     def render(

@@ -51,7 +51,7 @@ class PlayerBowAttackState(BaseEntityState):
             self.entity.x + self.entity.width / 2 - 4,
             self.entity.y + self.entity.height / 2 - 4,
         )
-        self.dungeon.current_room.projectiles.append(Projectile(arrow, direction))
+        self.dungeon.current_room.projectiles.append(Projectile(arrow, direction, max_tiles=8))
 
     def update(self, dt: float) -> None:
         self.entity.interact_requested = False
