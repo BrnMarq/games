@@ -89,6 +89,9 @@ class PlayerPotWalkState(BaseEntityState):
 
             for doorway in room.doorways:
                 if doorway.open and player.collides(doorway):
+                    if getattr(room, "boss_defeated", False) and self.dungeon.on_victory:
+                        self.dungeon.on_victory()
+                        return
                     player.y = doorway.y + 4
                     self.dungeon.begin_shifting(-settings.VIRTUAL_WIDTH, 0)
 
@@ -98,6 +101,9 @@ class PlayerPotWalkState(BaseEntityState):
 
             for doorway in room.doorways:
                 if doorway.open and player.collides(doorway):
+                    if getattr(room, "boss_defeated", False) and self.dungeon.on_victory:
+                        self.dungeon.on_victory()
+                        return
                     player.y = doorway.y + 4
                     self.dungeon.begin_shifting(settings.VIRTUAL_WIDTH, 0)
 
@@ -107,6 +113,9 @@ class PlayerPotWalkState(BaseEntityState):
 
             for doorway in room.doorways:
                 if doorway.open and player.collides(doorway):
+                    if getattr(room, "boss_defeated", False) and self.dungeon.on_victory:
+                        self.dungeon.on_victory()
+                        return
                     player.x = doorway.x + 8
                     self.dungeon.begin_shifting(0, -settings.VIRTUAL_HEIGHT)
 
@@ -116,6 +125,9 @@ class PlayerPotWalkState(BaseEntityState):
 
             for doorway in room.doorways:
                 if doorway.open and player.collides(doorway):
+                    if getattr(room, "boss_defeated", False) and self.dungeon.on_victory:
+                        self.dungeon.on_victory()
+                        return
                     player.x = doorway.x + 8
                     self.dungeon.begin_shifting(0, settings.VIRTUAL_HEIGHT)
 

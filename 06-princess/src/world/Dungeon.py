@@ -26,9 +26,11 @@ class Dungeon:
         self,
         player: TypeVar("Player"),
         on_game_over: Callable[[], None],
+        on_victory: Callable[[], None] = None,
     ) -> None:
         self.player = player
         self.on_game_over = on_game_over
+        self.on_victory = on_victory
 
         # Current room we're operating in.
         self.current_room = Room(self.player, self.on_game_over)

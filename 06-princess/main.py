@@ -9,6 +9,7 @@ This file contains the main program to run the game.
 """
 
 from src.TheLegendOfThePrincess import TheLegendOfThePrincess
+from src import states
 
 if __name__ == "__main__":
     game = TheLegendOfThePrincess()
