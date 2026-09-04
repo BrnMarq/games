@@ -38,6 +38,14 @@ class BattleEntity(Entity):
 
         self.current_hp: float = self.hp
 
+        self.rest_turns: int = definition.get("rest_turns", 2)
+        self.cooldown: int = 0
+
+    def reset_cooldown(self) -> None:
+        self.cooldown = self.rest_turns
+        if hasattr(self, "cooldown_bar"):
+            self.cooldown_bar.value = self.rest_turns - self.cooldown
+
     def damage(self, amount: float) -> None:
         self.current_hp -= amount
 

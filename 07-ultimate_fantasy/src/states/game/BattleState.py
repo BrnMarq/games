@@ -146,6 +146,16 @@ class BattleState(BaseState):
                 color=pygame.Color(32, 32, 189),
                 theme=BAR_THEME,
             )
+            character.cooldown_bar = ProgressBar(
+                character.x - (width - character.width) / 2,
+                character.y - 2,
+                width,
+                3,
+                value=character.rest_turns - character.cooldown,
+                max_value=character.rest_turns,
+                color=pygame.Color(32, 189, 32),
+                theme=BAR_THEME,
+            )
 
         for enemy in self.enemies:
             width = math.floor(enemy.width * 1.5)
@@ -157,6 +167,16 @@ class BattleState(BaseState):
                 value=enemy.current_hp,
                 max_value=enemy.hp,
                 color=pygame.Color(189, 32, 32),
+                theme=BAR_THEME,
+            )
+            enemy.cooldown_bar = ProgressBar(
+                enemy.x - (width - enemy.width) / 2,
+                enemy.y - 6,
+                width,
+                3,
+                value=enemy.rest_turns - enemy.cooldown,
+                max_value=enemy.rest_turns,
+                color=pygame.Color(32, 189, 32),
                 theme=BAR_THEME,
             )
 
@@ -220,11 +240,23 @@ class BattleState(BaseState):
             if not enemy.dead:
                 enemy.render(surface)
                 enemy.energy_bar.render(surface)
+                enemy.cooldown_bar.render(surface)
+                self._render_bar_slices(surface, enemy.cooldown_bar)
 
         for character in self.party.characters.values():
             if not character.dead:
                 character.render(surface)
                 character.energy_bar.render(surface)
                 character.exp_bar.render(surface)
+                character.cooldown_bar.render(surface)
+                self._render_bar_slices(surface, character.cooldown_bar)
 
         self.bottom_panel.render(surface)
+
+    def _render_bar_slices(self, surface: pygame.Surface, bar: Any) -> None:
+        if bar.max_value <= 1:
+            return
+        slice_width = bar.width / bar.max_value
+        for i in range(1, int(bar.max_value)):
+            x = bar.x + int(i * slice_width)
+            pygame.draw.line(surface, (0, 0, 0), (x, bar.y), (x, bar.y + bar.height - 1))

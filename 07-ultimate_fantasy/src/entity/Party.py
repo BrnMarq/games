@@ -68,6 +68,7 @@ class Party:
                     "defenseIV": char_def["defenseIV"],
                     "magicIV": char_def["magicIV"],
                     "actions": char_def["actions"],
+                    "rest_turns": char_def["rest_turns"],
                     "direction": "down",
                     "map_x": x,
                     "map_y": y,
