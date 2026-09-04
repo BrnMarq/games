@@ -44,6 +44,12 @@ class PlayState(BaseState):
             self.state_machine.push(PauseMenuState(self.state_machine), play_state=self)
             return
 
+        if input_id == "party_menu" and input_data.pressed:
+            from src.states.game.PartyMenuState import PartyMenuState
+
+            self.state_machine.push(PartyMenuState(self.state_machine), play_state=self)
+            return
+
         self.world.on_input(input_id, input_data)
 
     def render(self, surface: pygame.Surface) -> None:
