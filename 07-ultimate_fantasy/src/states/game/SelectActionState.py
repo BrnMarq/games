@@ -66,6 +66,7 @@ class SelectActionState(BaseState):
             for target in alive_targets:
                 Timer.tween(0.5, [(target.energy_bar, {"value": target.current_hp})])
 
+            self.entity.reset_cooldown()
             self._show_result(f"{action['name']} for {amount} HP to each target.")
 
     def _resolve(self, action: Dict[str, Any], target: Any) -> None:
@@ -73,6 +74,7 @@ class SelectActionState(BaseState):
         settings.SOUNDS[action["sound_effect"]].play()
         Timer.tween(0.5, [(target.energy_bar, {"value": target.current_hp})])
 
+        self.entity.reset_cooldown()
         self._show_result(f"{action['name']} for {amount} HP to {target.name}.")
 
     def _show_result(self, message: str) -> None:
@@ -87,6 +89,7 @@ class SelectActionState(BaseState):
 
     def _nothing(self) -> None:
         self.state_machine.pop()
+        self.entity.reset_cooldown()
         self.on_action_selected()
 
     def update(self, dt: float) -> None:

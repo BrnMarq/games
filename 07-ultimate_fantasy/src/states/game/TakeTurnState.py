@@ -95,8 +95,6 @@ class TakeTurnState(BaseState):
         from src.states.game.SelectActionState import SelectActionState
 
         def on_action_selected() -> None:
-            character.reset_cooldown()
-
             if all(enemy.dead for enemy in self.battle_state.enemies):
                 self._victory()
             else:
@@ -153,15 +151,19 @@ class TakeTurnState(BaseState):
 
         from src.states.game.BattleMessageState import BattleMessageState
 
+        will_attack_again = (
+            self.enemy_attacks_in_a_row < 3
+            and enemy.klass == "boss"
+            and random.randint(1, 3) == 1
+        )
+
+        if not will_attack_again:
+            enemy.reset_cooldown()
+
         def on_message_close() -> None:
-            if (
-                self.enemy_attacks_in_a_row < 3
-                and enemy.klass == "boss"
-                and random.randint(1, 3) == 1
-            ):
+            if will_attack_again:
                 self._take_enemy_turn(enemy)
             else:
-                enemy.reset_cooldown()
                 self._current_boss = None
                 self.enemy_attacks_in_a_row = 0
                 self._next_turn()
