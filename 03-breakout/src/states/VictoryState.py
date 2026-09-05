@@ -1,9 +1,9 @@
 """
-ISPPV1 2023
+ISPPV1-I2026
 Study Case: Breakout
 
-Author: Alejandro Mujica
-alejandro.j.mujic4@gmail.com
+Author: Brian Marquez
+brnmarq@gmail.com
 
 This file contains the class to define the Victory state.
 """

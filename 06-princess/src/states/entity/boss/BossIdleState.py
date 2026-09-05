@@ -1,5 +1,5 @@
 """
-ISPPV1 2023
+ISPPV1-I2026
 Study Case: The Legend of the Princess (ARPG)
 
 This file contains the class BossIdleState.

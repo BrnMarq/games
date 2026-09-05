@@ -1,9 +1,9 @@
 """
-ISPPV1 2023
+ISPPV1-I2026
 Study Case: Ultimate Fantasy (RPG)
 
-Author: Alejandro Mujica
-alejandro.j.mujic4@gmail.com
+Author: Brian Marquez
+brnmarq@gmail.com
 
 This file contains the class Party: the group of playable Characters
 moving together on the overworld map (a leader plus followers trailing

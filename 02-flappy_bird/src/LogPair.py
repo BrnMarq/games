@@ -1,9 +1,9 @@
 """
-ISPPV1 2023
+ISPPV1-I2026
 Study Case: Flappy Bird
 
-Author: Alejandro Mujica
-alejandro.j.mujic4@gmail.com
+Author: Brian Marquez
+brnmarq@gmail.com
 
 This file contains the definition of the class LogPair: a top log
 (rendered flipped upside down) and a bottom log, LOGS_GAP pixels

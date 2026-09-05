@@ -1,9 +1,9 @@
 """
-ISPPV1 2023
+ISPPV1-I2026
 Study Case: Super Martian (Platformer)
 
-Author: Alejandro Mujica
-alejandro.j.mujic4@gmail.com
+Author: Brian Marquez
+brnmarq@gmail.com
 
 This file contains the game settings that include the association of the
 inputs with an their ids, constants of values to set up the game, sounds,

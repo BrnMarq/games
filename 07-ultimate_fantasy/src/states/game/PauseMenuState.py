@@ -1,9 +1,9 @@
 """
-ISPPV1 2023
+ISPPV1-I2026
 Study Case: Ultimate Fantasy (RPG)
 
-Author: Alejandro Mujica
-alejandro.j.mujic4@gmail.com
+Author: Brian Marquez
+brnmarq@gmail.com
 
 This file contains the class PauseMenuState: pushed on top of PlayState
 (which keeps rendering, frozen, underneath it) when the player presses

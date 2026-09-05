@@ -1,5 +1,5 @@
 """
-ISPPV1 2023
+ISPPV1-I2026
 Study Case: Ultimate Fantasy (RPG)
 
 This file contains the class PartyActionState: pushed on top of
