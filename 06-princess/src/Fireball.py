@@ -11,6 +11,8 @@ import math
 
 import pygame
 
+from gale.animation import Animation
+
 import settings
 
 _FIREBALL_SPEED = 120
@@ -41,12 +43,16 @@ class Fireball:
             self.vx = 0
             self.vy = _FIREBALL_SPEED
 
+        self.animation = Animation([1, 2, 3, 4], 0.1)
+
     def get_collision_rect(self) -> pygame.Rect:
         return pygame.Rect(round(self.x), round(self.y), self.width, self.height)
 
     def update(self, dt: float) -> None:
         if self.dead:
             return
+
+        self.animation.update(dt)
 
         self.x += self.vx * dt
         self.y += self.vy * dt
@@ -72,16 +78,17 @@ class Fireball:
     def render(
         self, surface: pygame.Surface, offset_x: float = 0, offset_y: float = 0
     ) -> None:
-        pygame.draw.rect(
-            surface,
-            _FIREBALL_COLOR,
-            pygame.Rect(
-                round(self.x + offset_x),
-                round(self.y + offset_y),
-                self.width,
-                self.height,
-            ),
-        )
+        texture_id = "fireball"
+        texture = settings.TEXTURES[texture_id]
+        frame = settings.frame(texture_id, self.animation.get_current_frame())
+        image = pygame.Surface((frame.width, frame.height), pygame.SRCALPHA)
+        image.blit(texture, (0, 0), frame)
+
+        # Center the sprite on the collision rect
+        sprite_x = round(self.x + offset_x - (frame.width - self.width) / 2)
+        sprite_y = round(self.y + offset_y - (frame.height - self.height) / 2)
+        
+        surface.blit(image, (sprite_x, sprite_y))
 
     def collides(self, target) -> bool:
         return self.get_collision_rect().colliderect(target.get_collision_rect())

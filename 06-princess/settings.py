@@ -129,6 +129,15 @@ TEXTURES = {
     "character-shoot-bow": pygame.image.load(
         BASE_DIR / "assets" / "graphics" / "character_shoot_bow.png"
     ),
+    "boss-walk": pygame.image.load(
+        BASE_DIR / "assets" / "graphics" / "boss_walk.png"
+    ),
+    "boss-fireball": pygame.image.load(
+        BASE_DIR / "assets" / "graphics" / "boss_fireball.png"
+    ),
+    "fireball": pygame.image.load(
+        BASE_DIR / "assets" / "graphics" / "fireball.png"
+    ),
 }
 
 # Used by Room's gale.tilemap.TileMap: TILE_* ids above are 1-based,
@@ -154,6 +163,9 @@ FRAMES = {
     "character-shoot-bow": frames.generate_frames(
         TEXTURES["character-shoot-bow"], 32, 32
     ),
+    "boss-walk": frames.generate_frames(TEXTURES["boss-walk"], 16, 32),
+    "boss-fireball": frames.generate_frames(TEXTURES["boss-fireball"], 32, 32),
+    "fireball": frames.generate_frames(TEXTURES["fireball"], 16, 16),
 }
 
 
