@@ -111,6 +111,7 @@ class PlayState(BaseState):
 
         self.additional_birds = []
         self.has_split = False
+        self.can_split = False
 
         self.pressed_position = pygame.Vector2()
         self.pressed_camera_target = pygame.Vector2()
@@ -132,6 +133,12 @@ class PlayState(BaseState):
             return
 
         if self.flinging:
+            if self.can_split:
+                for other in self.bird.body.touching_bodies:
+                    if other.user_data != "wind":
+                        self.can_split = False
+                        break
+
             self.camera_target.update(self.bird.position)
             self._update_idle()
         elif self.aiming:
@@ -221,7 +228,7 @@ class PlayState(BaseState):
         elif input_id == "touch_motion":
             self._on_touch_motion(input_data)
         elif input_id == "split" and input_data.pressed:
-            if self.flinging and not self.has_split:
+            if self.flinging and self.can_split and not self.has_split:
                 self._split_bird()
 
     def _split_bird(self) -> None:
@@ -279,6 +286,7 @@ class PlayState(BaseState):
         scale = FLING_IMPULSE_SCALE * self.bird.mass
         self.bird.body.apply_impulse(pull.x * scale, pull.y * scale)
         self.flinging = True
+        self.can_split = True
         self.idle_frames = 0
 
     def _on_touch_motion(self, input_data: InputData) -> None:
