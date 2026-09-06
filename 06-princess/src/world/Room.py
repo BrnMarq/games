@@ -447,7 +447,7 @@ class Room:
 
         switch.on_collide = open_all_doors
 
-        if random.randint(1, 1) == 1 and not self.player.has_bow:
+        if random.randint(1, 5) == 1 and not self.player.has_bow:
             chest = GameObject(
                 GAME_OBJECT_DEFS["chest"],
                 random.randint(
