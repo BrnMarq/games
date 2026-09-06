@@ -105,6 +105,8 @@ TILE_CLOSED_CHEST = 167
 BOSS_VULNERABLE_DURATION = 2.0
 BOSS_STUN_COOLDOWN = 3.0
 
+ACTION_REACH = 8
+
 TEXTURES = {
     "tiles": pygame.image.load(BASE_DIR / "assets" / "graphics" / "tilesheet.png"),
     "background": pygame.image.load(

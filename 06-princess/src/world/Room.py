@@ -264,92 +264,48 @@ class Room:
 
     def take_adjacent_pot(self, player: TypeVar("Player")) -> None:
         """
-        Looks for a takeable object directly in front of the player (one
-        tile away, in the direction they're currently facing) and, if
+        Looks for a takeable object directly in front of the player and, if
         found, removes it from the room and has the player lift it.
         """
-        player_y = player.y + player.height / 2
-        player_height = player.height - player.height / 2
-        player_col = int((player.x + player.width / 2) // settings.TILE_SIZE)
-        player_row = int((player_y + player_height / 2) // settings.TILE_SIZE)
+        reach_rect = player.get_collision_rect()
+        if player.direction == "left":
+            reach_rect.x -= settings.ACTION_REACH
+        elif player.direction == "right":
+            reach_rect.x += settings.ACTION_REACH
+        elif player.direction == "up":
+            reach_rect.y -= settings.ACTION_REACH
+        elif player.direction == "down":
+            reach_rect.y += settings.ACTION_REACH
 
         for obj in self.objects:
             if not obj.takeable:
                 continue
 
-            obj_col = int((obj.x + obj.width / 2) // settings.TILE_SIZE)
-            obj_row = int((obj.y + obj.height / 2) // settings.TILE_SIZE)
-
-            adjacent = (
-                (
-                    player.direction == "right"
-                    and obj_row == player_row
-                    and obj_col == player_col + 1
-                )
-                or (
-                    player.direction == "left"
-                    and obj_row == player_row
-                    and obj_col == player_col - 1
-                )
-                or (
-                    player.direction == "up"
-                    and obj_col == player_col
-                    and obj_row == player_row - 1
-                )
-                or (
-                    player.direction == "down"
-                    and obj_col == player_col
-                    and obj_row == player_row + 1
-                )
-            )
-
-            if adjacent:
+            if obj.get_collision_rect().colliderect(reach_rect):
                 self.objects.remove(obj)
                 player.change_state("pot-lift", pot=obj)
                 return
 
     def open_adjacent_chest(self, player: TypeVar("Player")) -> None:
         """
-        Looks for a closed chest directly in front of the player (one
-        tile away, in the direction they're currently facing) and, if
+        Looks for a closed chest directly in front of the player and, if
         found, opens it.
         """
-        player_y = player.y + player.height / 2
-        player_height = player.height - player.height / 2
-        player_col = int((player.x + player.width / 2) // settings.TILE_SIZE)
-        player_row = int((player_y + player_height / 2) // settings.TILE_SIZE)
+        reach_rect = player.get_collision_rect()
+        if player.direction == "left":
+            reach_rect.x -= settings.ACTION_REACH
+        elif player.direction == "right":
+            reach_rect.x += settings.ACTION_REACH
+        elif player.direction == "up":
+            reach_rect.y -= settings.ACTION_REACH
+        elif player.direction == "down":
+            reach_rect.y += settings.ACTION_REACH
 
         for obj in self.objects:
             if obj.type != "chest" or obj.state != "closed":
                 continue
 
-            obj_col = int((obj.x + obj.width / 2) // settings.TILE_SIZE)
-            obj_row = int((obj.y + obj.height / 2) // settings.TILE_SIZE)
-
-            adjacent = (
-                (
-                    player.direction == "right"
-                    and obj_row == player_row
-                    and obj_col == player_col + 1
-                )
-                or (
-                    player.direction == "left"
-                    and obj_row == player_row
-                    and obj_col == player_col - 1
-                )
-                or (
-                    player.direction == "up"
-                    and obj_col == player_col
-                    and obj_row == player_row - 1
-                )
-                or (
-                    player.direction == "down"
-                    and obj_col == player_col
-                    and obj_row == player_row + 1
-                )
-            )
-
-            if adjacent:
+            if obj.get_collision_rect().colliderect(reach_rect):
                 obj.state = "open"
                 settings.SOUNDS["door"].play()
                 player.has_bow = True
