@@ -74,9 +74,10 @@ FLING_IMPULSE_SCALE = 13.25
 # frames (~1.6s at 60fps) -- ported from main.script, retuned for gale's
 # pixel/physics scale (angular velocity here is radians/second, not
 # Defold's units).
-IDLE_LINEAR_SPEED_THRESHOLD = 30
-IDLE_ANGULAR_SPEED_THRESHOLD = 0.3
-IDLE_FRAMES_LIMIT = 100
+IDLE_LINEAR_SPEED_THRESHOLD = 50
+IDLE_ANGULAR_SPEED_THRESHOLD = 2.0
+IDLE_FRAMES_LIMIT = 50
+
 
 CAMERA_FOLLOW_RATE = 6.0
 CAMERA_ZOOM_LERP_RATE = 3.0
