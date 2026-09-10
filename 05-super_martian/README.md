@@ -28,7 +28,7 @@ The key block acts as the bridge to clearing a level. Its behavior spans four di
   ):
       self.game_level.reveal_key_block()
   ```
-- Once the player collects enough coins or defeats enough enemies to reach `settings.SCORE_OBJECTIVE`:
+- Once the player collects enough coins to reach `settings.SCORE_OBJECTIVE`:
   - `reveal_key_block()` is called.
   - The saved tile GID is restored back into the `ground` layer (`ground[row][col] = gid`), instantly making the block solid and visible in the world.
   - The `reveal_keyblock` sound effect plays to alert the player.

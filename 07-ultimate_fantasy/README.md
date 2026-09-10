@@ -81,13 +81,3 @@ Selecting a field-usable healing ability transitions to the target selection sta
 1. The player uses **Left / Right** to choose which party member should receive the heal.
 2. Pressing **Enter** applies the healing formula, plays the recovery audio, updates the target's HP bar immediately, and returns to the menu.
 3. This allows the player to sustain the party between dungeon skirmishes without entering combat.
-
----
-
-### 2. The Pause Menu (`PauseMenuState`)
-
-- **Access**: Pressing the **`Escape`** key while exploring pauses the game and pushes [`src/states/game/PauseMenuState.py`](src/states/game/PauseMenuState.py).
-- **Available Options**:
-  1. **Continue**: Closes the pause overlay and resumes the game.
-  2. **Save Game**: Serializes the current party status, character progression, inventory, and overworld position to a JSON file in the `saves/` folder.
-  3. **Quit**: Returns to the title screen.

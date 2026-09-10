@@ -6,7 +6,7 @@ This project implements an airborne **Bird Divider (Split)** ability, allowing t
 
 ## How It Works
 
-When activated, the flying bird splits into a spread of **three independent birds**, greatly increasing destructive area and impact potential across enemy structures.
+When activated, the flying bird splits into a spread of **three independent birds**
 
 ---
 

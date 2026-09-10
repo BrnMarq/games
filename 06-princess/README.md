@@ -31,32 +31,6 @@ The bow offers a ranged combat alternative to the sword, enabling long-distance 
 
 ---
 
-## Technical Challenges: Rotating Sprites on Shoot
-
-Handling projectile rotations in Pygame with spritesheet assets introduced several unique challenges:
-
-### 1. Spritesheet Subsurface Isolation
-Unlike games with standalone image files for every angle, the arrow is packed within a shared texture sheet (`bow_and_arrows.png`).
-- `pygame.transform.rotate()` cannot be applied to the master spritesheet without rotating everything.
-- To rotate only the current frame, the engine must extract a dedicated subsurface from the spritesheet using the frame rectangle before performing the transformation:
-  ```python
-  frame_rect = settings.frame(self.obj.texture_id, ...)
-  sprite = settings.TEXTURES[self.obj.texture_id].subsurface(frame_rect)
-  rotated = pygame.transform.rotate(sprite, angle)
-  ```
-
-### 2. Pivot Point & Bounding Box Shifts
-- `pygame.transform.rotate` rotates counter-clockwise around the top-left `(0, 0)` corner of the surface rather than its geometric center.
-- Rotating an oblong or non-square sprite by 90° or 180° alters the dimensions of the resulting surface bounding box.
-- Without compensating for this geometric pivot shift, the arrow tip visually wobbles or drifts off-center relative to the actual directional collision rectangle. Mapping angles explicitly (`{"up": 0, "down": 180, "left": 90, "right": -90}`) and aligning spawn offsets ensures visual trajectory matches collision bounds.
-
-### 3. Character Animation Sprite Offsets
-- Standard character walk and idle sprites use 16×16 or 16×32 frame boundaries.
-- The bow shooting animation (`character_shoot_bow.png`) uses larger 32×32 frames to accommodate the drawn bow and arrow extension.
-- Without custom offsets, switching into the bow attack state would cause the character to visibly jump or shudder. The bow attack state introduces custom render offsets (`offset_x = 8`, `offset_y = 5`) to seamlessly anchor the shooting sprite to the entity's underlying physics hitbox.
-
----
-
 ## The Boss Encounter
 
 The dungeon culminates in a dedicated boss battle room designed to test both ranged and melee combat skills.
